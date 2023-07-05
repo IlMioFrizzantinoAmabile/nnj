@@ -16,7 +16,6 @@ dependencies = [
     "black[jupyter]==23.3.0",
     "ruff==0.0.267",
     "typeguard==2.13.3",
-    "pyright==1.1.308",
     "pytest==7.1.2",
     "pytest-xdist==2.5.0",
 ]
@@ -39,11 +38,6 @@ testpaths = [
     "tests",
 ]
 
-[tool.pyright]
-include = ["nnj"]
-exclude = ["**/node_modules",
-    "**/__pycache__",
-]
 defineConstant = { DEBUG = true }
 
 reportMissingImports = "warning"
