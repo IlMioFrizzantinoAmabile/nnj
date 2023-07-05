@@ -14,7 +14,10 @@ classifiers = [
 
 dependencies = [
     "black[jupyter]==23.3.0",
-    "ruff==0.0.267"
+    "ruff==0.0.267",
+    "pyright==1.1.308",
+    "pytest==7.1.2",
+    "pytest-xdist==2.5.0",
 ]
 
 [tool.setuptools.packages.find]
