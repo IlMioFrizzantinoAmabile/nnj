@@ -1,9 +1,9 @@
-import torch
-import torch.nn.functional as F
-from torch import nn, Tensor
-from nnj.abstract_jacobian import AbstractJacobian
-
 from typing import Tuple, Union
+
+import torch
+from torch import nn, Tensor
+
+from nnj.abstract_jacobian import AbstractJacobian
 
 
 class Linear(nn.Linear, AbstractJacobian):

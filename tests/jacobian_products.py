@@ -55,7 +55,7 @@ def test_jTmjp_wrt_weight(layer):
 
 if __name__ == "__main__":
     # get all the layers
-    for layer in layers:
+    for layer in [nnj.Linear(5,4)]:
         # jacobian vector products
         test_jvp_wrt_input(layer)
         test_jvp_wrt_weight(layer)

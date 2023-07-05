@@ -1,8 +1,8 @@
+from typing import List, Union
+
 import torch
 import torch.nn.functional as F
-from torch import nn, Tensor
-
-from typing import Optional, Tuple, List, Union
+from torch import Tensor
 
 
 class AbstractJacobian:

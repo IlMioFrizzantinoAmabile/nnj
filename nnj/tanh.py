@@ -1,8 +1,9 @@
+from typing import Union
+
 import torch
 from torch import nn, Tensor
-from nnj.abstract_diagonal_jacobian import AbstractDiagonalJacobian
 
-from typing import Union
+from nnj.abstract_diagonal_jacobian import AbstractDiagonalJacobian
 
 
 class Tanh(AbstractDiagonalJacobian, nn.Tanh):
