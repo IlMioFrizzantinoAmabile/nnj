@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 
 import torch
 from torch import nn, Tensor
@@ -12,8 +12,10 @@ class Sequential(AbstractJacobian, nn.Sequential):
         self._modules_list = list(self._modules.values())
 
         self._n_params = 0
-        for k in range(len(self._modules)):
-            self._n_params += self._modules_list[k]._n_params
+        # for k in range(len(self._modules)):
+        #    self._n_params += self._modules_list[k]._n_params
+        for layer in self._modules_list:
+            self._n_params += layer._n_params
 
         self.add_hooks = add_hooks
         if self.add_hooks:
@@ -27,23 +29,17 @@ class Sequential(AbstractJacobian, nn.Sequential):
                     )
                 )
 
+    def forward(self, x: Tensor) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+        if self.add_hooks:
+            self.feature_maps = [x]
+        for module in self._modules.values():
+            val = module(x)
+            x = val
+        return x
+
     def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input") -> Tensor:
         """Returns the Jacobian matrix"""
-        if wrt == "input":
-            xs = x.shape
-            identity_x = torch.eye(xs[1:].numel(), xs[1:].numel(), dtype=x.dtype, device=x.device).repeat(
-                xs[0], 1, 1
-            )
-            val, jmp = self.forward(x, jacobian=identity_x)
-            return jmp
-        elif wrt == "weight":
-            if val is None:
-                val = self.forward(x)
-            vs = val.shape
-            identity_val = torch.eye(
-                vs[1:].numel(), vs[1:].numel(), dtype=val.dtype, device=val.device
-            ).repeat(vs[0], 1, 1)
-            return self._mjp(x, val, identity_val, wrt="weight")
+        return self._mjp(x, val, None, wrt=wrt)
 
     ######################
     ### forward passes ###
@@ -82,6 +78,8 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         jacobian matrix product
         """
+        if matrix is None:
+            return self._jacobian(x, val, wrt=wrt)
         if wrt == "input":
             for module in self._modules.values():
                 val = module(x)
@@ -109,7 +107,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         self,
         x: Tensor,
         val: Union[Tensor, None],
-        matrix: Union[Tensor, None],
+        matrix: Union[Tensor, List, None],
         wrt: str = "input",
         from_diag: bool = False,
         to_diag: bool = False,
@@ -142,10 +140,20 @@ class Sequential(AbstractJacobian, nn.Sequential):
             if matrix is None:
                 matrix = torch.ones((x.shape[0], self._n_params), dtype=x.dtype, device=x.device)
                 from_diag = True
+            if not isinstance(matrix, list):
+                new_matrix = []
+                p = 0
+                for layer in self._modules_list:
+                    if from_diag:
+                        new_matrix.append(matrix[:, p : p + layer._n_params])
+                    else:
+                        # neglect the outer-block-diagonal elements
+                        new_matrix.append(matrix[:, p : p + layer._n_params, p : p + layer._n_params])
+                    p += layer._n_params
+                assert p == self._n_params
+                matrix = new_matrix
             # forward pass again
-            assert (from_diag and isinstance(matrix, Tensor)) or (not from_diag and isinstance(matrix, list))
             jmjTp = None
-            p = 0
             for k in range(len(self._modules_list)):
                 # propagate through the input
                 if jmjTp is not None:
@@ -154,7 +162,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
                         self.feature_maps[k + 1],
                         jmjTp,
                         wrt="input",
-                        from_diag=from_diag if k == 0 else diag_backprop,
+                        from_diag=diag_backprop,
                         to_diag=to_diag if k == len(self._modules_list) - 1 else diag_backprop,
                         diag_backprop=diag_backprop,
                     )
@@ -162,10 +170,10 @@ class Sequential(AbstractJacobian, nn.Sequential):
                 jmjTp_from_layer = self._modules_list[k]._jmjTp(
                     self.feature_maps[k],
                     self.feature_maps[k + 1],
-                    matrix[k] if not from_diag else matrix[:, p : p + self._modules_list[k]._n_params],
+                    matrix[k],
                     wrt="weight",
-                    from_diag=from_diag if k == 0 else diag_backprop,
-                    to_diag=to_diag,
+                    from_diag=from_diag,
+                    to_diag=to_diag if k == len(self._modules_list) - 1 else diag_backprop,
                     diag_backprop=diag_backprop,
                 )
                 if jmjTp_from_layer is not None:
@@ -173,7 +181,6 @@ class Sequential(AbstractJacobian, nn.Sequential):
                         jmjTp = jmjTp_from_layer
                     else:
                         jmjTp += jmjTp_from_layer
-                p += self._modules_list[k]._n_params
             return jmjTp
 
     #######################
@@ -218,6 +225,11 @@ class Sequential(AbstractJacobian, nn.Sequential):
         # forward pass
         if val is None:
             val = self.forward(x)
+        if matrix is None:
+            vs = val.shape
+            matrix = torch.eye(vs[1:].numel(), vs[1:].numel(), dtype=x.dtype, device=x.device).repeat(
+                vs[0], 1, 1
+            )
         # backward pass
         ms = []
         for k in range(len(self._modules_list) - 1, -1, -1):

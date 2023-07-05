@@ -87,12 +87,12 @@ class Linear(nn.Linear, AbstractJacobian):
         """
         jacobian matrix jacobian.T product
         """
-        if matrix is None:
-            matrix = torch.ones_like(x)
-            from_diag = True
         if val is None:
             val = self.forward(x)
         if wrt == "input":
+            if matrix is None:
+                matrix = torch.ones_like(x)
+                from_diag = True
             if not from_diag and not to_diag:
                 # full -> full
                 return torch.einsum("mn,bnj,kj->bmk", self.weight, matrix, self.weight)
@@ -106,6 +106,9 @@ class Linear(nn.Linear, AbstractJacobian):
                 # diag -> diag
                 return torch.einsum("mn,bn,mn->bm", self.weight, matrix, self.weight)
         elif wrt == "weight":
+            if matrix is None:
+                matrix = torch.ones((x.shape[0], self._n_params), dtype=x.dtype, device=x.device)
+                from_diag = True
             if not from_diag and not to_diag:
                 # full -> full
                 matrixT = matrix.transpose(1, 2)
@@ -115,13 +118,33 @@ class Linear(nn.Linear, AbstractJacobian):
                 return jmjTp
             elif from_diag and not to_diag:
                 # diag -> full
-                raise NotImplementedError
+                bs, _ = matrix.shape
+                c1 = x.shape[1]
+                c2 = val.shape[1]
+                x_sq = x * x
+                if self.bias is None:
+                    return torch.diag_embed(torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1)))
+                else:
+                    return torch.diag_embed(
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1))
+                        + matrix[:, c2 * c1 :]
+                    )
             elif not from_diag and to_diag:
                 # full -> diag
                 raise NotImplementedError
             elif from_diag and to_diag:
                 # diag -> diag
-                raise NotImplementedError
+                bs, _ = matrix.shape
+                c1 = x.shape[1]
+                c2 = val.shape[1]
+                x_sq = x * x
+                if self.bias is None:
+                    return torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1))
+                else:
+                    return (
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1))
+                        + matrix[:, c2 * c1 :]
+                    )
 
     #######################
     ### backward passes ###
@@ -193,9 +216,11 @@ class Linear(nn.Linear, AbstractJacobian):
         elif wrt == "weight":
             if not from_diag and not to_diag:
                 # full -> full
-                # TODO: improve efficiency
-                jacobian = self._jacobian(x, val, wrt=wrt)
-                return torch.einsum("bji,bjk,bkq->biq", jacobian, matrix, jacobian)
+                matrixT = matrix.transpose(1, 2)
+                mTjp = self._mjp(x, val, matrixT, wrt=wrt)
+                jTmp = mTjp.transpose(1, 2)
+                jTmjp = self._jmp(x, val, jTmp, wrt=wrt)
+                return jTmjp
             elif from_diag and not to_diag:
                 # diag -> full
                 # TODO: improve efficiency

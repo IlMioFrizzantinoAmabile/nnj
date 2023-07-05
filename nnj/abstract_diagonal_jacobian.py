@@ -109,8 +109,8 @@ class AbstractDiagonalJacobian(AbstractJacobian):
         matrix jacobian product
         """
         if matrix is None:
-            return self._jacobian(x, val, diag=False)
-        diag_jacobian = self._jacobian(x, val, diag=True)
+            return self._jacobian(x, val, wrt=wrt, diag=False)
+        diag_jacobian = self._jacobian(x, val, wrt=wrt, diag=True)
         if diag_jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bj->bij", matrix, diag_jacobian)

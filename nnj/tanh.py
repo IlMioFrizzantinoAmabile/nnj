@@ -18,7 +18,7 @@ class Tanh(AbstractDiagonalJacobian, nn.Tanh):
         if wrt == "input":
             if val is None:
                 val = self.forward(x)
-            diag_jacobian = (torch.ones(val.shape, device=val.device) - val**2).reshape(val.shape[0], -1)
+            diag_jacobian = (torch.ones_like(val) - val**2).reshape(val.shape[0], -1)
             if diag:
                 return diag_jacobian
             else:
