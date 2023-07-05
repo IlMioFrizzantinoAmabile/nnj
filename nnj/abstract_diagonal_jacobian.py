@@ -23,9 +23,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### forward passes ###
     ######################
 
-    def _jvp(
-        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input"
-    ) -> Union[Tensor, None]:
+    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         """
         jacobian vector product
         """
@@ -90,9 +88,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### backward passes ###
     #######################
 
-    def _vjp(
-        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input"
-    ) -> Union[Tensor, None]:
+    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         """
         vector jacobian product
         """

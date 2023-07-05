@@ -45,13 +45,9 @@ class Linear(nn.Linear, AbstractJacobian):
             if self.bias is None:
                 return torch.einsum("bkj,bj->bk", vector.view(b, c2, c1), x)
             else:
-                return (
-                    torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].view(b, c2, c1), x) + vector[:, c2 * c1 :]
-                )
+                return torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].view(b, c2, c1), x) + vector[:, c2 * c1 :]
 
-    def _jmp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
-    ) -> Tensor:
+    def _jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         jacobian matrix product
         """
@@ -125,8 +121,7 @@ class Linear(nn.Linear, AbstractJacobian):
                     return torch.diag_embed(torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1)))
                 else:
                     return torch.diag_embed(
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1))
-                        + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1)) + matrix[:, c2 * c1 :]
                     )
             elif not from_diag and to_diag:
                 # full -> diag
@@ -141,8 +136,7 @@ class Linear(nn.Linear, AbstractJacobian):
                     return torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1))
                 else:
                     return (
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1))
-                        + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1)) + matrix[:, c2 * c1 :]
                     )
 
     #######################
@@ -162,9 +156,7 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
 
-    def _mjp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
-    ) -> Tensor:
+    def _mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         matrix jacobian product
         """

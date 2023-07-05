@@ -153,33 +153,25 @@ def test_jmjTp_wrt_input(layer, x, from_diag=False, to_diag=False):
         if to_diag is False:
             # full -> full
             jmjTp_slow = torch.einsum("bij, bjk, bqk -> biq", jacobian, tangent_matrix_input, jacobian)
-            jmjTp_fast = layer._jmjTp(
-                x, None, tangent_matrix_input, wrt="input", from_diag=False, to_diag=False
-            )
+            jmjTp_fast = layer._jmjTp(x, None, tangent_matrix_input, wrt="input", from_diag=False, to_diag=False)
         elif to_diag is True:
             # full -> diag
             jmjTp_slow = torch.einsum("bij, bjk, bik -> bi", jacobian, tangent_matrix_input, jacobian)
-            jmjTp_fast = layer._jmjTp(
-                x, None, tangent_matrix_input, wrt="input", from_diag=False, to_diag=True
-            )
+            jmjTp_fast = layer._jmjTp(x, None, tangent_matrix_input, wrt="input", from_diag=False, to_diag=True)
 
     elif from_diag is True:
         tangent_diagonal_matrix_input = torch.randn(batch_size, x.shape[1:].numel())
 
         if to_diag is False:
             # diag -> full
-            jmjTp_slow = torch.einsum(
-                "bij, bj, bqj -> biq", jacobian, tangent_diagonal_matrix_input, jacobian
-            )
+            jmjTp_slow = torch.einsum("bij, bj, bqj -> biq", jacobian, tangent_diagonal_matrix_input, jacobian)
             jmjTp_fast = layer._jmjTp(
                 x, None, tangent_diagonal_matrix_input, wrt="input", from_diag=True, to_diag=False
             )
         elif to_diag is True:
             # diag -> diag
             jmjTp_slow = torch.einsum("bij, bj, bij -> bi", jacobian, tangent_diagonal_matrix_input, jacobian)
-            jmjTp_fast = layer._jmjTp(
-                x, None, tangent_diagonal_matrix_input, wrt="input", from_diag=True, to_diag=True
-            )
+            jmjTp_fast = layer._jmjTp(x, None, tangent_diagonal_matrix_input, wrt="input", from_diag=True, to_diag=True)
 
     assert jmjTp_fast.shape == jmjTp_slow.shape
     assert torch.isclose(jmjTp_fast, jmjTp_slow, atol=1e-4).all()
@@ -201,17 +193,13 @@ def test_jmjTp_wrt_weight(layer, x, from_diag=False, to_diag=False):
 
         if to_diag is False:
             # diag -> full
-            jmjTp_slow = torch.einsum(
-                "bij, bj, bqj -> biq", jacobian, tangent_diagonal_matrix_params, jacobian
-            )
+            jmjTp_slow = torch.einsum("bij, bj, bqj -> biq", jacobian, tangent_diagonal_matrix_params, jacobian)
             jmjTp_fast = layer._jmjTp(
                 x, None, tangent_diagonal_matrix_params, wrt="weight", from_diag=True, to_diag=False
             )
         elif to_diag is True:
             # diag -> diag
-            jmjTp_slow = torch.einsum(
-                "bij, bj, bij -> bi", jacobian, tangent_diagonal_matrix_params, jacobian
-            )
+            jmjTp_slow = torch.einsum("bij, bj, bij -> bi", jacobian, tangent_diagonal_matrix_params, jacobian)
             jmjTp_fast = layer._jmjTp(
                 x, None, tangent_diagonal_matrix_params, wrt="weight", from_diag=True, to_diag=True
             )
@@ -232,32 +220,24 @@ def test_jTmjp_wrt_input(layer, x, from_diag=False, to_diag=False):
         if to_diag is False:
             # full -> full
             jTmjp_slow = torch.einsum("bji, bjk, bkq -> biq", jacobian, tangent_matrix_output, jacobian)
-            jTmjp_fast = layer._jTmjp(
-                x, None, tangent_matrix_output, wrt="input", from_diag=False, to_diag=False
-            )
+            jTmjp_fast = layer._jTmjp(x, None, tangent_matrix_output, wrt="input", from_diag=False, to_diag=False)
         elif to_diag is True:
             # full -> diag
             jTmjp_slow = torch.einsum("bji, bjk, bki -> bi", jacobian, tangent_matrix_output, jacobian)
-            jTmjp_fast = layer._jTmjp(
-                x, None, tangent_matrix_output, wrt="input", from_diag=False, to_diag=True
-            )
+            jTmjp_fast = layer._jTmjp(x, None, tangent_matrix_output, wrt="input", from_diag=False, to_diag=True)
 
     elif from_diag is True:
         tangent_diagonal_matrix_output = torch.randn(batch_size, output_shape[1:].numel())
 
         if to_diag is False:
             # diag -> full
-            jTmjp_slow = torch.einsum(
-                "bji, bj, bjk -> bik", jacobian, tangent_diagonal_matrix_output, jacobian
-            )
+            jTmjp_slow = torch.einsum("bji, bj, bjk -> bik", jacobian, tangent_diagonal_matrix_output, jacobian)
             jTmjp_fast = layer._jTmjp(
                 x, None, tangent_diagonal_matrix_output, wrt="input", from_diag=True, to_diag=False
             )
         elif to_diag is True:
             # diag -> diag
-            jTmjp_slow = torch.einsum(
-                "bji, bj, bji -> bi", jacobian, tangent_diagonal_matrix_output, jacobian
-            )
+            jTmjp_slow = torch.einsum("bji, bj, bji -> bi", jacobian, tangent_diagonal_matrix_output, jacobian)
             jTmjp_fast = layer._jTmjp(
                 x, None, tangent_diagonal_matrix_output, wrt="input", from_diag=True, to_diag=True
             )
@@ -284,9 +264,7 @@ def test_jTmjp_wrt_weight(layer, x, from_diag=False, to_diag=False):
         elif to_diag is True:
             # full -> diag
             jTmjp_slow = torch.einsum("bji, bjk, bki -> bi", jacobian, tangent_matrix_output, jacobian)
-            jTmjp_fast = layer._jTmjp(
-                x, None, tangent_matrix_output, wrt="weight", from_diag=False, to_diag=True
-            )
+            jTmjp_fast = layer._jTmjp(x, None, tangent_matrix_output, wrt="weight", from_diag=False, to_diag=True)
 
     elif from_diag is True:
         tangent_diagonal_matrix_output = torch.randn(batch_size, output_shape[1:].numel())
@@ -296,9 +274,7 @@ def test_jTmjp_wrt_weight(layer, x, from_diag=False, to_diag=False):
             raise NotImplementedError
         elif to_diag is True:
             # diag -> diag
-            jTmjp_slow = torch.einsum(
-                "bji, bj, bji -> bi", jacobian, tangent_diagonal_matrix_output, jacobian
-            )
+            jTmjp_slow = torch.einsum("bji, bj, bji -> bi", jacobian, tangent_diagonal_matrix_output, jacobian)
             jTmjp_fast = layer._jTmjp(
                 x, None, tangent_diagonal_matrix_output, wrt="weight", from_diag=True, to_diag=True
             )

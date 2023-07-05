@@ -12,9 +12,7 @@ class AbstractJacobian:
     - pull back and push forward metrics
     """
 
-    def _jacobian(
-        self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input"
-    ) -> Union[Tensor, None]:
+    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         # this function has to be implemented for every new nnj layer
         raise NotImplementedError

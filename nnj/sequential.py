@@ -1,4 +1,4 @@
-from typing import Literal, List, Tuple, Union
+from typing import List, Literal, Tuple, Union
 
 import torch
 from torch import nn, Tensor
@@ -24,9 +24,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
 
             for k in range(len(self._modules)):
                 self.handles.append(
-                    self._modules_list[k].register_forward_hook(
-                        lambda m, i, o: self.feature_maps.append(o.detach())
-                    )
+                    self._modules_list[k].register_forward_hook(lambda m, i, o: self.feature_maps.append(o.detach()))
                 )
 
     def forward(self, x: Tensor) -> Union[Tensor, Tuple[Tensor, Tensor]]:
@@ -72,9 +70,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jvp
 
-    def _jmp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
-    ) -> Tensor:
+    def _jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         jacobian matrix product
         """
@@ -200,25 +196,19 @@ class Sequential(AbstractJacobian, nn.Sequential):
         for k in range(len(self._modules_list) - 1, -1, -1):
             # backpropagate through the weight
             if wrt == "weight":
-                v_k = self._modules_list[k]._vjp(
-                    self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="weight"
-                )
+                v_k = self._modules_list[k]._vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="weight")
                 if v_k is not None:
                     vs = v_k + vs if isinstance(v_k, list) else [v_k] + vs
                 if k == 0:
                     break
             # backpropagate through the input
-            vector = self._modules_list[k]._vjp(
-                self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="input"
-            )
+            vector = self._modules_list[k]._vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="input")
         if wrt == "weight":
             return torch.cat(vs, dim=1)
         elif wrt == "input":
             return vector
 
-    def _mjp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
-    ) -> Tensor:
+    def _mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         matrix jacobian product
         """
@@ -227,25 +217,19 @@ class Sequential(AbstractJacobian, nn.Sequential):
             val = self.forward(x)
         if matrix is None:
             vs = val.shape
-            matrix = torch.eye(vs[1:].numel(), vs[1:].numel(), dtype=x.dtype, device=x.device).repeat(
-                vs[0], 1, 1
-            )
+            matrix = torch.eye(vs[1:].numel(), vs[1:].numel(), dtype=x.dtype, device=x.device).repeat(vs[0], 1, 1)
         # backward pass
         ms = []
         for k in range(len(self._modules_list) - 1, -1, -1):
             # backpropagate through the weight
             if wrt == "weight":
-                m_k = self._modules_list[k]._mjp(
-                    self.feature_maps[k], self.feature_maps[k + 1], matrix, wrt="weight"
-                )
+                m_k = self._modules_list[k]._mjp(self.feature_maps[k], self.feature_maps[k + 1], matrix, wrt="weight")
                 if m_k is not None:
                     ms = m_k + ms if isinstance(m_k, list) else [m_k] + ms
                 if k == 0:
                     break
             # backpropagate through the input
-            matrix = self._modules_list[k]._mjp(
-                self.feature_maps[k], self.feature_maps[k + 1], matrix, wrt="input"
-            )
+            matrix = self._modules_list[k]._mjp(self.feature_maps[k], self.feature_maps[k + 1], matrix, wrt="input")
         if wrt == "weight":
             return torch.cat(ms, dim=2)
         elif wrt == "input":
