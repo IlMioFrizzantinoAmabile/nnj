@@ -1,12 +1,17 @@
+from typing import Tuple, Union
+
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
-from nnj.abstract_jacobian import AbstractJacobian
 
-from typing import Tuple, Union
+from nnj.abstract_jacobian import AbstractJacobian
 
 
 class Linear(nn.Linear, AbstractJacobian):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
+
     def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         b, c1 = x.shape

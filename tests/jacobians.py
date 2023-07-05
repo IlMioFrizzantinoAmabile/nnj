@@ -7,8 +7,9 @@ import torch
 import torch.nn as nn
 from flax.core import freeze
 from flax.linen import Dense
+from jax import jvp
 from jax import numpy as jnp
-from jax import vjp, jvp
+from jax import vjp
 
 import nnj
 

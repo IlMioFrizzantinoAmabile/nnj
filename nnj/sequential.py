@@ -1,8 +1,9 @@
+from typing import Tuple, Union
+
 import torch
 from torch import nn, Tensor
-from nnj.abstract_jacobian import AbstractJacobian
 
-from typing import Tuple, Union
+from nnj.abstract_jacobian import AbstractJacobian
 
 
 class Sequential(AbstractJacobian, nn.Sequential):

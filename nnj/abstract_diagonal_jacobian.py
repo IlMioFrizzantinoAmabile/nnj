@@ -1,9 +1,10 @@
+from typing import List, Optional, Tuple, Union
+
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
-from nnj.abstract_jacobian import AbstractJacobian
 
-from typing import Optional, Tuple, List, Union
+from nnj.abstract_jacobian import AbstractJacobian
 
 
 class AbstractDiagonalJacobian(AbstractJacobian):

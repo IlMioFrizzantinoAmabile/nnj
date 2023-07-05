@@ -1,8 +1,8 @@
+from typing import List, Optional, Tuple, Union
+
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
-
-from typing import Optional, Tuple, List, Union
 
 
 class AbstractJacobian:
@@ -12,9 +12,6 @@ class AbstractJacobian:
     - propagate jacobian vector and jacobian matrix products, both forward and backward
     - pull back and push forward metrics
     """
-
-    def __init__(self) -> None:
-        self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
 
     def _jacobian(
         self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input"
