@@ -1,7 +1,6 @@
 from typing import Literal, Union
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor
 
 from nnj.abstract_jacobian import AbstractJacobian

@@ -1,7 +1,6 @@
 from typing import List, Literal, Union
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor
 
 
