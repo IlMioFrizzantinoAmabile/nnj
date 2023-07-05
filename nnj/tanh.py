@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Literal, Union
 
 import torch
 from torch import nn, Tensor
@@ -12,7 +12,11 @@ class Tanh(AbstractDiagonalJacobian, nn.Tanh):
         self._n_params = 0
 
     def _jacobian(
-        self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input", diag: bool = False
+        self,
+        x: Tensor,
+        val: Union[Tensor, None] = None,
+        wrt: Literal = "input",
+        diag: bool = False,
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         if wrt == "input":

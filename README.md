@@ -140,7 +140,7 @@ class MyCustomLayer(AbstractJacobian, nn.Linear):
     def forward(self, x):
         # define your forward function
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input") -> Tensor:
+    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
 
         # val is the output of the model, if this is not given, make a forward pass
         if val is None:

@@ -12,17 +12,62 @@ classifiers = [
     "Programming Language :: Python",
 ]
 
+dependencies = [
+    "black[jupyter]==23.3.0",
+    "ruff==0.0.267",
+    "typeguard==2.13.3",
+    "pytest==7.1.2",
+    "pytest-xdist==2.5.0",
+]
+
 [tool.setuptools.packages.find]
 include = ["nnj*"]
 
-[tool.black]
-# https://github.com/psf/black
-line-length = 110
-target-version = ["py38"]
-exclude = "(.eggs|.git|.hg|.mypy_cache|.nox|.tox|.venv|.svn|_build|buck-out|build|dist|docs)"
-
 [tool.isort]
 profile = "black"
-line_length = 110
+line_length = 120
 force_sort_within_sections = "False"
 order_by_type = "False"
+
+[tool.black]
+line-length = 120
+
+[tool.pytest.ini_options]
+addopts = "-n=4 --typeguard-packages=nnj --disable-warnings"
+testpaths = [
+    "tests",
+]
+
+defineConstant = { DEBUG = true }
+
+reportMissingImports = "warning"
+reportMissingTypeStubs = false
+reportPrivateImportUsage = false
+
+pythonVersion = "3.8"
+pythonPlatform = "Linux"
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors.
+    "F",  # Pyflakes rules.
+    "PLC",  # Pylint convention warnings.
+    "PLE",  # Pylint errors.
+    "PLR",  # Pylint refactor recommendations.
+    "PLW",  # Pylint warnings.
+]
+ignore = [
+    "E501",  # Line too long.
+    "F722",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
+    "F821",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
+    "PLR2004",  # Magic value used in comparison.
+    "PLR0915",  # Too many statements.
+    "PLR0913",  # Too many arguments.
+    "PLC0414",  # Import alias does not rename variable. (this is used for exporting names)
+    "PLC1901",  # Use falsey strings.
+    "PLR5501",  # Use `elif` instead of `else if`.
+    "PLR0911",  # Too many return statements.
+    "PLR0912",  # Too many branches.
+    "PLW0603",  # Globa statement updates are discouraged.
+    "PLW2901",  # For loop variable overwritten.
+]
