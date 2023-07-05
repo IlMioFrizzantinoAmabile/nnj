@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Literal, Union
 
 import torch
 import torch.nn.functional as F
@@ -13,11 +13,8 @@ class AbstractJacobian:
     - pull back and push forward metrics
     """
 
-    def __init__(self) -> None:
-        self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
-
     def _jacobian(
-        self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input"
+        self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input"
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         # this function has to be implemented for every new nnj layer
@@ -27,13 +24,13 @@ class AbstractJacobian:
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: str = "input") -> Union[Tensor, None]:
+    def _jvp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         jacobian = self._jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bj->bi", jacobian, vector)
 
-    def _jmp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: str = "input") -> Union[Tensor, None]:
+    def _jmp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         jacobian = self._jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
@@ -44,7 +41,7 @@ class AbstractJacobian:
         x: Tensor,
         val: Tensor,
         matrix: Tensor,
-        wrt: str = "input",
+        wrt: Literal = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
@@ -71,13 +68,13 @@ class AbstractJacobian:
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: str = "input") -> Union[Tensor, None]:
+    def _vjp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         jacobian = self._jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bi,bij->bj", vector, jacobian)
 
-    def _mjp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: str = "input") -> Union[Tensor, None]:
+    def _mjp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         jacobian = self._jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
@@ -88,7 +85,7 @@ class AbstractJacobian:
         x: Tensor,
         val: Tensor,
         matrix: Tensor,
-        wrt: str = "input",
+        wrt: Literal = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,

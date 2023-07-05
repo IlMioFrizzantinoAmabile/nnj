@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Literal, Tuple, Union
 
 import torch
 from torch import nn, Tensor
@@ -7,7 +7,11 @@ from nnj.abstract_jacobian import AbstractJacobian
 
 
 class Linear(nn.Linear, AbstractJacobian):
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input") -> Tensor:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
+
+    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         b, c1 = x.shape
         if wrt == "input":
@@ -26,7 +30,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input") -> Tensor:
+    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         jacobian vector product
         """
@@ -46,7 +50,7 @@ class Linear(nn.Linear, AbstractJacobian):
                 )
 
     def _jmp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: str = "input"
+        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
     ) -> Tensor:
         """
         jacobian matrix product
@@ -74,7 +78,7 @@ class Linear(nn.Linear, AbstractJacobian):
         x: Tensor,
         val: Union[Tensor, None],
         matrix: Union[Tensor, None],
-        wrt: str = "input",
+        wrt: Literal = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
@@ -122,7 +126,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input") -> Tensor:
+    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         vector jacobian product
         """
@@ -136,7 +140,7 @@ class Linear(nn.Linear, AbstractJacobian):
                 return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
 
     def _mjp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: str = "input"
+        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
     ) -> Tensor:
         """
         matrix jacobian product
@@ -159,7 +163,7 @@ class Linear(nn.Linear, AbstractJacobian):
         x: Tensor,
         val: Union[Tensor, None],
         matrix: Union[Tensor, None],
-        wrt: str = "input",
+        wrt: Literal = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
