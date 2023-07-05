@@ -8,7 +8,9 @@
 pip install -e .
 ```
 
-## Basic usage
+## Comparison with jax, backpack, asdfghj, and torch
+
+# TODO: compare speed and memory usage of implementation.
 
 ## Example usage
 

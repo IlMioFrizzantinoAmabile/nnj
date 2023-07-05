@@ -1,15 +1,11 @@
 import torch
 from torch import nn, Tensor
-from nnj.abstract_jacobian import AbstractJacobian
+from nnj.abstract_diagonal_jacobian import AbstractDiagonalJacobian
 
-from typing import Optional, Tuple, List, Union
+from typing import Union
+
 
 class Tanh(AbstractDiagonalJacobian, nn.Tanh):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._n_params = 0
-
     def _jacobian(
         self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input", diag: bool = False
     ) -> Union[Tensor, None]:
