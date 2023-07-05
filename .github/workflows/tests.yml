@@ -1,0 +1,38 @@
+name: "Core tests"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.8.13
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.13'
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
+      - name: Install dependencies
+        run: |
+          pip install --upgrade --upgrade-strategy eager -e .[dev]
+      - name: Run Ruff
+        run: ruff tests/
+      - name: Run Black
+        run: black tests/ --check
+      - name: Run Pyright
+        run: |
+          pyright
+      - name: Test with pytest
+        run: |
+          pytest
