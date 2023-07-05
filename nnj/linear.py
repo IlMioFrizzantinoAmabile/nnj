@@ -1,89 +1,93 @@
-from typing import List, Optional, Tuple, Union
-
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
-
 from nnj.abstract_jacobian import AbstractJacobian
 
+from typing import Optional, Tuple, List, Union
 
-class Linear(AbstractJacobian, nn.Linear):
-    def _jacobian_wrt_input(self, x: Tensor, val: Tensor) -> Tensor:
-        return self.weight
+class Linear(nn.Linear, AbstractJacobian):
 
-    def _jacobian_wrt_weight(self, x: Tensor, val: Tensor) -> Tensor:
-        b, c1 = x.shape
-        c2 = val.shape[1]
-        out_identity = torch.diag_embed(torch.ones(c2, device=x.device))
-        jacobian = torch.einsum("bk,ij->bijk", x, out_identity).reshape(b, c2, c2 * c1)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._n_params = args[0]*args[1]
         if self.bias is not None:
-            jacobian = torch.cat([jacobian, out_identity.unsqueeze(0).expand(b, -1, -1)], dim=2)
-        return jacobian
+            self._n_params += args[1]
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input") -> Tensor:
+    def forward(
+        self, x: Tensor, jacobian: Union[Tensor, bool] = False
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+        #val = self._call_impl(x)
+        val = F.linear(x, self.weight, bias=self.bias)
+        if jacobian is False:
+            return val
+        elif jacobian is True:
+            jac = self._jacobian(x, val, wrt="input")
+            return val, jac
+        else:
+            jac = self._jmp(x, val, jacobian, wrt='input')
+            return val, jac
+
+    def _jacobian(
+        self, x: Tensor, val: Union[Tensor, None] = None, wrt: str = "input"
+    ) -> Tensor:
         """Returns the Jacobian matrix"""
+        b, c1 = x.shape
         if wrt == "input":
-            return self._jacobian_wrt_input(x, val)
+            return self.weight.unsqueeze(0).expand(b, *self.weight.shape)
         elif wrt == "weight":
             if val is None:
                 val = self.forward(x)
-            return self._jacobian_wrt_weight(x, val)
+            c2 = val.shape[1]
+            out_identity = torch.diag_embed(torch.ones(c2, dtype=val.dtype, device=val.device))
+            jacobian = torch.einsum("bk,ij->bijk", x, out_identity).reshape(b, c2, c2 * c1)
+            if self.bias is not None:
+                jacobian = torch.cat([jacobian, out_identity.unsqueeze(0).expand(b, c2, c2)], dim=2)
+            return jacobian
 
-    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input") -> Tensor:
+
+    ######################
+    ### forward passes ###
+    ######################
+
+    def _jvp(
+        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input"
+    ) -> Tensor:
         """
         jacobian vector product
         """
         if wrt == "input":
             return torch.einsum("kj,bj->bk", self.weight, vector)
         elif wrt == "weight":
-            b, l = x.shape
-            return torch.einsum("bkj,bj->bk", vector.view(b, l, l), x)
-
-    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input") -> Tensor:
-        """
-        vector jacobian product
-        """
-        if wrt == "input":
-            return torch.einsum("bj,jk->bk", vector, self.weight)
-        elif wrt == "weight":
-            b, l = x.shape
+            b, c1 = x.shape
+            if val is None:
+                val = self.forward(x)
+            c2 = val.shape[1]
+            assert self._n_params == vector.shape[1]
             if self.bias is None:
-                return torch.einsum("bi,bj->bij", vector, x).view(b, -1)
+                return torch.einsum("bkj,bj->bk", vector.view(b, c2, c1), x)
             else:
-                return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
-
+                return torch.einsum("bkj,bj->bk", vector[:, :c2*c1].view(b, c2, c1), x) + vector[:, c2*c1:] 
+    
     def _jmp(
         self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: str = "input"
     ) -> Tensor:
         """
         jacobian matrix product
         """
+        if matrix is None:
+            return self._jacobian(x, val, wrt = wrt)
         if wrt == "input":
             return torch.einsum("kj,bji->bki", self.weight, matrix)
         elif wrt == "weight":
-            # TODO
-            jacobian = self._jacobian_wrt_weight(x, val)
-            return torch.einsum("bij,bjk->bik", jacobian, matrix)
-
-    def _mjp(
-        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: str = "input"
-    ) -> Tensor:
-        """
-        matrix jacobian product
-        """
-        if wrt == "input":
-            return torch.einsum("bij,jk->bik", matrix, self.weight)
-        elif wrt == "weight":
-            # TODO check this!
-            # jacobian = self._jacobian_wrt_weight(x, val)
-            # return torch.einsum("bij,bjk->bik", matrix, jacobian)
-            b, l = x.shape
-            r = matrix.shape[1]
-            assert x.shape[0] == matrix.shape[0]
+            b, c1 = x.shape
+            if val is None:
+                val = self.forward(x)
+            c2 = val.shape[1]
+            assert self._n_params == matrix.shape[1]
             if self.bias is None:
-                return torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1)
+                return torch.einsum("bkji,bj->bki", matrix.view(b, c2, c1, -1), x)
             else:
-                return torch.cat([torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1), matrix], dim=2)
+                return torch.einsum("bkji,bj->bki", matrix[:, :c2*c1, :].view(b, c2, c1, -1), x) + matrix[:, c2*c1:, :]
 
     def _jmjTp(
         self,
@@ -117,7 +121,62 @@ class Linear(AbstractJacobian, nn.Linear):
                 # diag -> diag
                 return torch.einsum("mn,bn,mn->bm", self.weight, matrix, self.weight)
         elif wrt == "weight":
-            raise NotImplementedError
+            if not from_diag and not to_diag:
+                # full -> full
+                matrixT = matrix.transpose(1,2)
+                jmTp = self._jmp(x, val, matrixT, wrt=wrt)
+                mjTp = jmTp.transpose(1,2)
+                jmjTp = self._jmp(x, val, mjTp, wrt=wrt)
+                return jmjTp
+            elif from_diag and not to_diag:
+                # diag -> full
+                raise NotImplementedError
+            elif not from_diag and to_diag:
+                # full -> diag
+                raise NotImplementedError
+            elif from_diag and to_diag:
+                # diag -> diag
+                raise NotImplementedError
+
+    #######################
+    ### backward passes ###
+    #######################
+
+    def _vjp(
+        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: str = "input"
+    ) -> Tensor:
+        """
+        vector jacobian product
+        """
+        if wrt == "input":
+            return torch.einsum("bj,jk->bk", vector, self.weight)
+        elif wrt == "weight":
+            b, l = x.shape
+            if self.bias is None:
+                return torch.einsum("bi,bj->bij", vector, x).view(b, -1)
+            else:
+                return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
+
+    def _mjp(
+        self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: str = "input"
+    ) -> Tensor:
+        """
+        matrix jacobian product
+        """
+        if matrix is None:
+            return self._jacobian(x, val, wrt = wrt)
+        if wrt == "input":
+            return torch.einsum("bij,jk->bik", matrix, self.weight)
+        elif wrt == "weight":
+            b, l = x.shape
+            r = matrix.shape[1]
+            assert x.shape[0]==matrix.shape[0]
+            if self.bias is None:
+                return torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1)
+            else:
+                return torch.cat([torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1), 
+                                  matrix], dim=2)
+
 
     def _jTmjp(
         self,
@@ -153,13 +212,13 @@ class Linear(AbstractJacobian, nn.Linear):
         elif wrt == "weight":
             if not from_diag and not to_diag:
                 # full -> full
-                # TODO
-                jacobian = self._jacobian_wrt_weight(x, val)
+                #TODO
+                jacobian = self._jacobian(x, val, wrt=wrt)
                 return torch.einsum("bji,bjk,bkq->biq", jacobian, matrix, jacobian)
             elif from_diag and not to_diag:
                 # diag -> full
-                # TODO
-                jacobian = self._jacobian_wrt_weight(x, val)
+                #TODO
+                jacobian = self._jacobian(x, val, wrt=wrt)
                 return torch.einsum("bji,bj,bjq->biq", jacobian, matrix, jacobian)
             elif not from_diag and to_diag:
                 # full -> diag
@@ -203,7 +262,9 @@ class Linear(AbstractJacobian, nn.Linear):
         if wrt == "input":
             if not from_diag and not to_diag:
                 # full -> full
-                return tuple(torch.einsum("nm,bnj,jk->bmk", self.weight, m, self.weight) for m in matrixes)
+                return tuple(
+                    torch.einsum("nm,bnj,jk->bmk", self.weight, m, self.weight) for m in matrixes
+                )
             elif from_diag and not to_diag:
                 # diag -> full
                 return tuple(
@@ -211,7 +272,9 @@ class Linear(AbstractJacobian, nn.Linear):
                 )
             elif not from_diag and to_diag:
                 # full -> diag
-                return tuple(torch.einsum("nm,bnj,jm->bm", self.weight, m, self.weight) for m in matrixes)
+                return tuple(
+                    torch.einsum("nm,bnj,jm->bm", self.weight, m, self.weight) for m in matrixes
+                )
             elif from_diag and to_diag:
                 # diag -> diag
                 return tuple(
