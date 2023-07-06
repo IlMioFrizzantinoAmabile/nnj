@@ -3,7 +3,12 @@ import torch
 
 
 class Timer:
-    def time(self, func, dummy_input: torch.Tensor, repetitions: int = 300):
+    def time(self, 
+             func, 
+             dummy_input: torch.Tensor, 
+             dummy_label: torch.Tensor, 
+             repetitions: int = 300
+        ) -> tuple((float, float)):
         # INIT LOGGERS
         starter = torch.cuda.Event(enable_timing=True)
         ender = torch.cuda.Event(enable_timing=True)
@@ -12,18 +17,17 @@ class Timer:
 
         # GPU-WARM-UP
         for _ in range(10):
-            _ = func(dummy_input)
+            _ = func(dummy_input, dummy_label)
 
         # MEASURE PERFORMANCE
-        with torch.no_grad():
-            for rep in range(repetitions):
-                starter.record()
-                _ = func(dummy_input)
-                ender.record()
-                # WAIT FOR GPU SYNC
-                torch.cuda.synchronize()
-                curr_time = starter.elapsed_time(ender)
-                timings[rep] = curr_time
+        for rep in range(repetitions):
+            starter.record()
+            _ = func(dummy_input, dummy_label)
+            ender.record()
+            # WAIT FOR GPU SYNC
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            timings[rep] = curr_time
 
         mean_syn = np.sum(timings) / repetitions
         std_syn = np.std(timings)

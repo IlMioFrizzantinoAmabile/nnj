@@ -12,20 +12,21 @@ class GGN():
         self.model = nnj.utils.convert_to_nnj(model)
 
     def ggn(self, X: torch.tensor, y: torch.Tensor) -> torch.Tensor:
-        val = self.model(X)
 
         # backpropagate through the network
-        Jt_J = self.model.jTmjp(
-            X,
-            val,
-            None,
-            wrt="weights",  # computes the jacobian wrt weights or inputs
-            to_diag=True,  # computes the diagonal elements only
-            diag_backprop=False,  # approximates the diagonal elements of the Hessian
-        )
-
-        # average along batch size
-        Jt_J = torch.mean(Jt_J, dim=0)
+        with torch.no_grad():
+            Jt_J = self.model.jTmjp(
+                X,
+                None,
+                None,
+                wrt="weight",  # computes the jacobian wrt weights or inputs
+                to_diag=True,  # computes the diagonal elements only
+                from_diag=False,
+                diag_backprop=False,  # approximates the diagonal elements of the Hessian
+            )
+            
+            # average along batch size
+            Jt_J = torch.mean(Jt_J, dim=0)
 
         return Jt_J
 
@@ -34,13 +35,14 @@ if __name__ == "__main__":
 
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
-    X = torch.randn(10, 100, device="cuda")
-    y = torch.randn(10, 100, device="cuda")
+    X = torch.randn(10, 100, device="cuda:0")
+    y = torch.randn(10, 100, device="cuda:0")
     N = 300
 
-    model = linear_model.to("cuda")
+    model = linear_model
     ggn = GGN(model)
+    ggn.model = ggn.model.to("cuda:0")
 
     timer = Timer()
-    mu, std = timer.time(ggn, X, y, repetitions=N)
+    mu, std = timer.time(ggn.ggn, X, y, repetitions=N)
     print(f"NNJ: {mu:.2f} ± {std:.2f} ms")

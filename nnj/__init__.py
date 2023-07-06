@@ -12,7 +12,7 @@ from nnj.sequential import Sequential
 #############################
 ### non-parametric layers ###
 from nnj.tanh import Tanh
-from nnj.relu import ReLU
+# from nnj.relu import ReLU
 
 #############################
 ### utils                 ###

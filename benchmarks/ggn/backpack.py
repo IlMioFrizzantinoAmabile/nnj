@@ -55,8 +55,8 @@ if __name__ == "__main__":
     ggn_stochastic = GGNStochastic(model, nn.MSELoss())
 
     timer = Timer()
-    mu, std = timer.time(ggn_exact, X, y, repetitions=N)
+    mu, std = timer.time(ggn_exact.ggn, X, y, repetitions=N)
     print(f"DiagGGNExact: {mu:.2f} ± {std:.2f} ms")
 
-    mu, std = timer.time(ggn_stochastic, X, y, repetitions=N)
+    mu, std = timer.time(ggn_stochastic.ggn, X, y, repetitions=N)
     print(f"DiagGGNMC: {mu:.2f} ± {std:.2f} ms")

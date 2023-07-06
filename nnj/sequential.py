@@ -44,11 +44,18 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ######################
 
     def jvp(
-        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal["input", "weight"] = "input"
+        self, 
+        x: Tensor, 
+        val: Union[Tensor, None], 
+        vector: Tensor, 
+        wrt: Literal["input", "weight"] = "input",
     ) -> Tensor:
         """
         jacobian vector product
         """
+
+        assert wrt in ["input", "weight"]
+
         if wrt == "input":
             for module in self._modules.values():
                 val = module(x)
@@ -82,6 +89,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         jacobian matrix product
         """
+
+        assert wrt in ["input", "weight"]
+
         if matrix is None:
             return self.jacobian(x, val, wrt=wrt)
         if wrt == "input":
@@ -120,6 +130,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         jacobian matrix jacobian.T product
         """
+
+        assert wrt in ["input", "weight"]
+
         # forward pass
         if val is None:
             val = self.forward(x)
@@ -201,6 +214,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         vector jacobian product
         """
+
+        assert wrt in ["input", "weight"]
+
         # forward pass for computing hook values
         if val is None:
             val = self.forward(x)
@@ -232,6 +248,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         matrix jacobian product
         """
+
+        assert wrt in ["input", "weight"]
+
         # forward pass
         if val is None:
             val = self.forward(x)
@@ -268,11 +287,18 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         jacobian.T matrix jacobian product
         """
+
+        assert wrt in ["input", "weight"]
+
         # forward pass
         if val is None:
             val = self.forward(x)
         if matrix is None:
-            matrix = torch.ones((val.shape[0], val.shape[1:].numel()))
+            matrix = torch.ones(
+                (val.shape[0], val.shape[1:].numel()), 
+                device=x.device, 
+                dtype=x.dtype
+            )
             from_diag = True
         # backward pass
         ms = []
