@@ -13,3 +13,8 @@ from nnj.sequential import Sequential
 ### non-parametric layers ###
 from nnj.tanh import Tanh
 from nnj.relu import ReLU
+
+#############################
+### utils                 ###
+from nnj.utils import convert_to_nnj
+
