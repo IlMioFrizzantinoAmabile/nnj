@@ -23,13 +23,16 @@ to_test_easy = [
     nnj.Linear(3, 5, bias=False),
     nnj.Linear(3, 5),
     nnj.Tanh(),
+    nnj.ReLU(),
 ]
 to_test_advanced = [
     nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13), add_hooks=True),
+    nnj.Sequential(nnj.Linear(3, 5), nnj.ReLU(), nnj.Linear(5, 13), add_hooks=True),
     nnj.Sequential(
         nnj.Linear(3, 5),
         nnj.Tanh(),
         nnj.Linear(5, 2),
+        nnj.Tanh(),
         nnj.Tanh(),
         nnj.Linear(2, 13),
         nnj.Tanh(),
@@ -44,7 +47,7 @@ to_test_advanced = [
             nnj.Linear(5, 2),
             add_hooks=True,
         ),
-        nnj.Tanh(),
+        nnj.ReLU(),
         nnj.Linear(2, 13),
         add_hooks=True,
     ),
