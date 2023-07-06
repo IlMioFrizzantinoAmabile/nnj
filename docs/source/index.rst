@@ -20,14 +20,14 @@ The easiest way is to install from PyPI:
 
 .. code-block:: console
 
-   $ pip install pytorch-laplace
+   $ pip install nnj
 
 Or install from source:
 
 .. code-block:: console
 
-   $ git clone https://github.com/FrederikWarburg/pytorch-laplace
-   $ cd pytorch-laplace
+   $ git clone https://github.com/IlMioFrizzantinoAmabile/nnj
+   $ cd nnj
    $ pip install -e .
 
 
