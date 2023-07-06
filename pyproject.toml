@@ -18,7 +18,9 @@ dependencies = [
     "typeguard==2.13.3",
     "pytest==7.1.2",
     "pytest-xdist==2.5.0",
-    "pyright==1.1.308",
+    "pyright",
+    "sphinx",
+    "sphinx_rtd_theme",
     "torch>=1.13.1",
 ]
 

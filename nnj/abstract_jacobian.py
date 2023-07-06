@@ -12,8 +12,15 @@ class AbstractJacobian:
     - pull back and push forward metrics
     """
 
-    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Union[Tensor, None]:
-        """Returns the Jacobian matrix"""
+    def jacobian(
+        self,
+        x: Tensor,
+        val: Union[Tensor, None] = None,
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Union[Tensor, None]:
+        """
+        Returns the Jacobian matrix
+        """
         # this function has to be implemented for every new nnj layer
         raise NotImplementedError
 
@@ -21,13 +28,31 @@ class AbstractJacobian:
     ### forward passes ###
     ######################
 
-    def jvp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def jvp(
+        self,
+        x: Tensor,
+        val: Tensor,
+        vector: Tensor,
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Union[Tensor, None]:
+        """
+        jacobian vector product
+        """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bj->bi", jacobian, vector)
 
-    def jmp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def jmp(
+        self,
+        x: Tensor,
+        val: Tensor,
+        matrix: Tensor,
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Union[Tensor, None]:
+        """
+        jacobian matrix product
+        """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
@@ -38,11 +63,14 @@ class AbstractJacobian:
         x: Tensor,
         val: Tensor,
         matrix: Tensor,
-        wrt: Literal = "input",
+        wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
     ) -> Union[Tensor, None]:
+        """
+        jacobian matrix jacobian.T product
+        """
         if diag_backprop:  # TODO
             raise NotImplementedError
         jacobian = self.jacobian(x, val, wrt=wrt)
@@ -65,13 +93,27 @@ class AbstractJacobian:
     ### backward passes ###
     #######################
 
-    def vjp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def vjp(
+        self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal["input", "weight"] = "input"
+    ) -> Union[Tensor, None]:
+        """
+        vector jacobian product
+        """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bi,bij->bj", vector, jacobian)
 
-    def mjp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def mjp(
+        self,
+        x: Tensor,
+        val: Tensor,
+        matrix: Tensor,
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Union[Tensor, None]:
+        """
+        matrix jacobian product
+        """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
@@ -82,11 +124,14 @@ class AbstractJacobian:
         x: Tensor,
         val: Tensor,
         matrix: Tensor,
-        wrt: Literal = "input",
+        wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
     ) -> Union[Tensor, List[Tensor], None]:
+        """
+        jacobian.T matrix jacobian product
+        """
         if diag_backprop:
             # TODO: better error message
             raise NotImplementedError

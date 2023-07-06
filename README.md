@@ -113,10 +113,10 @@ If you are interested in the Jacobian of a specific layer, then set the value to
 ## Jacobian wrt. input
 b, c, l = x.shape
 v = torch.identity((b, c, l))
-layer._jvp(x=x, vector=v, wrt="input") # $$J_{x}$$
+layer.jvp(x=x, vector=v, wrt="input") # $$J_{x}$$
 
 ## Jacobian wrt. weight
-layer._jacobian(x=x, vector=v, wrt="weight") # $$J_{\theta}$$
+layer.jacobian(x=x, vector=v, wrt="weight") # $$J_{\theta}$$
 ```
 
 ## Approximate Jacobians
@@ -140,7 +140,7 @@ class MyCustomLayer(AbstractJacobian, nn.Linear):
     def forward(self, x):
         # define your forward function
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
+    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input") -> Tensor:
 
         # val is the output of the model, if this is not given, make a forward pass
         if val is None:

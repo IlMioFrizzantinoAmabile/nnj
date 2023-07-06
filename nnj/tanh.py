@@ -15,7 +15,7 @@ class Tanh(AbstractDiagonalJacobian, nn.Tanh):
         self,
         x: Tensor,
         val: Union[Tensor, None] = None,
-        wrt: Literal = "input",
+        wrt: Literal["input", "weight"] = "input",
         diag: bool = False,
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""

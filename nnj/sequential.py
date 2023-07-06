@@ -35,7 +35,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             x = val
         return x
 
-    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
+    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         return self._mjp(x, val, None, wrt=wrt)
 
@@ -43,7 +43,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### forward passes ###
     ######################
 
-    def jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def jvp(
+        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal["input", "weight"] = "input"
+    ) -> Tensor:
         """
         jacobian vector product
         """
@@ -70,7 +72,13 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jvp
 
-    def jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def jmp(
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        matrix: Union[Tensor, None],
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Tensor:
         """
         jacobian matrix product
         """
@@ -104,7 +112,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         x: Tensor,
         val: Union[Tensor, None],
         matrix: Union[Tensor, List, None],
-        wrt: Literal = "input",
+        wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
@@ -183,7 +191,9 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### backward passes ###
     #######################
 
-    def vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def vjp(
+        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal["input", "weight"] = "input"
+    ) -> Tensor:
         """
         vector jacobian product
         """
@@ -208,7 +218,13 @@ class Sequential(AbstractJacobian, nn.Sequential):
         elif wrt == "input":
             return vector
 
-    def mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def mjp(
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        matrix: Union[Tensor, None],
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Tensor:
         """
         matrix jacobian product
         """
@@ -240,7 +256,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         x: Tensor,
         val: Union[Tensor, None],
         matrix: Union[Tensor, None],
-        wrt: Literal = "input",
+        wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
