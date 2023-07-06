@@ -9,8 +9,9 @@ import nnj
 # define some input data
 xs = [
     torch.randn(7, 3),
-    1000 * torch.rand(7, 3),
     torch.ones(7, 3),
+    torch.randn(7, 3) + torch.ones(7, 3),
+    10 * torch.rand(7, 3),
 ]
 
 # get all the layers
@@ -28,6 +29,19 @@ to_test_advanced = [
         nnj.Tanh(),
         nnj.Linear(2, 13),
         nnj.Tanh(),
+        add_hooks=True,
+    ),
+    nnj.Sequential(
+        nnj.Linear(3, 5),
+        nnj.Tanh(),
+        nnj.Sequential(
+            nnj.Linear(5, 5),
+            nnj.Tanh(),
+            nnj.Linear(5, 2),
+            add_hooks=True,
+        ),
+        nnj.Tanh(),
+        nnj.Linear(2, 13),
         add_hooks=True,
     ),
 ]
@@ -231,13 +245,14 @@ def test_jmjTp_wrt_input():
 def test_jmjTp_wrt_weight():
     for layer in to_test_easy + to_test_advanced:
         for x in xs:
-            for from_diag in [True]:
+            for from_diag in [False, True]:
                 for to_diag in [False, True]:
-                    if from_diag is False and to_diag is False:
+                    if from_diag is False:
+                        # TODO: test these cases as well
                         continue
 
                     if layer._n_params == 0:
-                        return  # should check that .jmjTp returns None in all cases
+                        return  # TODO: check that .jmjTp returns None in all cases
 
                     batch_size = x.shape[0]
                     jacobian = layer.jacobian(x, None, wrt="weight")
@@ -328,9 +343,12 @@ def test_jTmjp_wrt_weight():
     for layer in to_test_easy + to_test_advanced:
         for x in xs:
             for from_diag in [False, True]:
-                for to_diag in [True]:
+                for to_diag in [False, True]:
+                    if to_diag is False:
+                            # TODO: test these cases as well
+                            continue
                     if layer._n_params == 0:
-                        return  # should check that .jmjTp returns None in all cases
+                        return  # TODO: check that .jmjTp returns None in all cases
 
                     output_shape = layer.forward(x).shape
                     batch_size = x.shape[0]
