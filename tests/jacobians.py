@@ -15,6 +15,5 @@ if __name__ == "__main__":
     # get all the layers
 
     # for layer in layers:
-    #     test_jacobian_wrt_input(layer)
-    #     test_jacobian_wrt_weight(layer)
-    pass
+    test_jacobian_wrt_input("layer")
+    test_jacobian_wrt_weight("layer")

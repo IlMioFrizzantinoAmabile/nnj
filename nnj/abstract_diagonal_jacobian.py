@@ -63,7 +63,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     def jmjTp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         matrix: Tensor,
         wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,

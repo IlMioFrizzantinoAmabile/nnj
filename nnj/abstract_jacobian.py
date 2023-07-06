@@ -31,7 +31,7 @@ class AbstractJacobian:
     def jvp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         vector: Tensor,
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
@@ -46,7 +46,7 @@ class AbstractJacobian:
     def jmp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         matrix: Tensor,
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
@@ -61,7 +61,7 @@ class AbstractJacobian:
     def jmjTp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         matrix: Tensor,
         wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,
@@ -94,7 +94,11 @@ class AbstractJacobian:
     #######################
 
     def vjp(
-        self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal["input", "weight"] = "input"
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        vector: Tensor,
+        wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
         vector jacobian product
@@ -107,7 +111,7 @@ class AbstractJacobian:
     def mjp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         matrix: Tensor,
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
@@ -122,7 +126,7 @@ class AbstractJacobian:
     def jTmjp(
         self,
         x: Tensor,
-        val: Tensor,
+        val: Union[Tensor, None],
         matrix: Tensor,
         wrt: Literal["input", "weight"] = "input",
         from_diag: bool = False,

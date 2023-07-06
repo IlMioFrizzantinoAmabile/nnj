@@ -11,7 +11,12 @@ class Linear(nn.Linear, AbstractJacobian):
         super().__init__(*args, **kwargs)
         self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
 
-    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input") -> Tensor:
+    def jacobian(
+        self,
+        x: Tensor,
+        val: Union[Tensor, None] = None,
+        wrt: Literal["input", "weight"] = "input",
+    ) -> Tensor:
         """Returns the Jacobian matrix"""
         b, c1 = x.shape
         if wrt == "input":
@@ -31,7 +36,11 @@ class Linear(nn.Linear, AbstractJacobian):
     ######################
 
     def jvp(
-        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal["input", "weight"] = "input"
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        vector: Tensor,
+        wrt: Literal["input", "weight"] = "input",
     ) -> Tensor:
         """
         jacobian vector product
@@ -152,7 +161,11 @@ class Linear(nn.Linear, AbstractJacobian):
     #######################
 
     def vjp(
-        self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal["input", "weight"] = "input"
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        vector: Tensor,
+        wrt: Literal["input", "weight"] = "input",
     ) -> Tensor:
         """
         vector jacobian product
