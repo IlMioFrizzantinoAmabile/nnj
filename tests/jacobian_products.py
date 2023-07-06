@@ -1,5 +1,9 @@
 """
-Test jacobian products wrt input and weights
+Test that the methods 
+.jvp() .vjp() .jmp() .mjp() .jmjTp() .jTmjp()
+return the correct tensor
+
+NOTE: this tests assumes that each layer has the correct implementation of .jacobian()
 """
 
 import torch
@@ -345,8 +349,8 @@ def test_jTmjp_wrt_weight():
             for from_diag in [False, True]:
                 for to_diag in [False, True]:
                     if to_diag is False:
-                            # TODO: test these cases as well
-                            continue
+                        # TODO: test these cases as well
+                        continue
                     if layer._n_params == 0:
                         return  # TODO: check that .jmjTp returns None in all cases
 
