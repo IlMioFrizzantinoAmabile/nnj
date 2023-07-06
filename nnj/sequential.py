@@ -44,10 +44,10 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ######################
 
     def jvp(
-        self, 
-        x: Tensor, 
-        val: Union[Tensor, None], 
-        vector: Tensor, 
+        self,
+        x: Tensor,
+        val: Union[Tensor, None],
+        vector: Tensor,
         wrt: Literal["input", "weight"] = "input",
     ) -> Tensor:
         """
@@ -294,11 +294,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         if val is None:
             val = self.forward(x)
         if matrix is None:
-            matrix = torch.ones(
-                (val.shape[0], val.shape[1:].numel()), 
-                device=x.device, 
-                dtype=x.dtype
-            )
+            matrix = torch.ones((val.shape[0], val.shape[1:].numel()), device=x.device, dtype=x.dtype)
             from_diag = True
         # backward pass
         ms = []

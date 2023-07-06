@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/css/readthedocs.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="Jacobian products" href="apis/nnj.html" />
+  <link rel="next" title="Introduction" href="nnj/index.html" />
   <!-- Google Analytics -->
   <script type="text/javascript">
     var collapsedSections = [];
@@ -141,9 +141,22 @@
         
         
         
-        <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+        <p class="caption" role="heading"><span class="caption-text">Learn about nnj</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apis/nnj.html">Jacobian products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-backpropagation">Chain rule (backpropagation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-of-hessian-backpropagation-of-hessian">Chain rule of Hessian (backpropagation of Hessian)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#nnj-a-more-efficient-backpropagation-of-hessian-approximations">NNJ: A more efficient backpropagation of Hessian approximations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#getting-started">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">AbstractDiagonalJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">AbstractJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/linear.html">Linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/relu.html">ReLU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/sequential.html">Sequential</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/tanh.html">Tanh</a></li>
 </ul>
 
         
@@ -214,12 +227,79 @@
                 
   <section id="nnj-documentation">
 <h1>NNJ Documentation<a class="headerlink" href="#nnj-documentation" title="Permalink to this heading">¶</a></h1>
+<p>nnj extends torch.nn with fast jacobian vector/matrix product (jvp/mvp).
+It is a order of magnitude faster and more memory efficient than alternatives.
+All jacobian computations are implemented in native PyTorch.</p>
+<p>Github: <a class="reference external" href="https://github.com/IlMioFrizzantinoAmabile/nnj">https://github.com/IlMioFrizzantinoAmabile/nnj</a></p>
+<p>Authors: Marco Miani and Frederik Warburg</p>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<p><strong>Dependence</strong>: Please install Pytorch first.</p>
+<p>The easiest way is to install from PyPI:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pytorch-laplace
+</pre></div>
+</div>
+<p>Or install from source:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/FrederikWarburg/pytorch-laplace
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>pytorch-laplace
+<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="want-to-learn-more-about-nnj">
+<h1>Want to learn more about nnj?<a class="headerlink" href="#want-to-learn-more-about-nnj" title="Permalink to this heading">¶</a></h1>
+<p>Check out our educational content, e.g. start reading our <a class="reference internal" href="nnj/index.html#introduction"><span class="std std-ref">Introduction to nnj</span></a>  to learn more about the nnj.
+The document seek to provide a simple introduction to the nnj and how to use it in PyTorch.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">nnj</span>
+
+<span class="c1"># Define you sequential model</span>
+<span class="n">network_nn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+   <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
+   <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+   <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
+<span class="p">)</span>
+
+<span class="c1"># convert to nnj</span>
+<span class="n">network_nnj</span> <span class="o">=</span> <span class="n">nnj</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">convert_to_nnj</span><span class="p">(</span>
+   <span class="n">network_nn</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># calling jTmjp on a sequential will iterate through the network and compute jacobian-tranposed matrix jacobian product (e.g. Generalized-Gauss Newton approximation of the hessian) of the nnj network.</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+   <span class="n">val</span> <span class="o">=</span> <span class="n">nnj_module</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+   <span class="c1"># backpropagate through the network</span>
+   <span class="n">Jt_J</span> <span class="o">=</span> <span class="n">nnj_module</span><span class="o">.</span><span class="n">jTmjp</span><span class="p">(</span>
+      <span class="n">x</span><span class="p">,</span>
+      <span class="n">val</span><span class="p">,</span>
+      <span class="kc">None</span><span class="p">,</span>
+      <span class="n">wrt</span><span class="o">=</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span>      <span class="c1"># computes the jacobian wrt weights or inputs</span>
+      <span class="n">to_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># computes the diagonal elements only</span>
+      <span class="n">diag_backprop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># approximates the diagonal elements, which speeds up the computations</span>
+   <span class="p">)</span>
+   <span class="c1"># average along batch size</span>
+   <span class="n">Jt_J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Jt_J</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">Jt_J</span>
+</pre></div>
+</div>
 <section id="links">
 <h2>Links:<a class="headerlink" href="#links" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apis/nnj.html">Jacobian products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">AbstractDiagonalJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">AbstractJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/linear.html">Linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/relu.html">ReLU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/sequential.html">Sequential</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/tanh.html">Tanh</a></li>
 </ul>
 </div>
 </section>
@@ -233,7 +313,7 @@
   
   <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
     
-    <a href="apis/nnj.html" class="btn btn-neutral float-right" title="Jacobian products" accesskey="n"
+    <a href="nnj/index.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n"
       rel="next">Next <img src="_static/images/chevron-right-blue.svg"
         class="next-page"></a>
     
@@ -265,7 +345,10 @@
           <div class="pytorch-right-menu" id="pytorch-right-menu">
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">NNJ Documentation</a><ul>
+<li><a class="reference internal" href="#">NNJ Documentation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#want-to-learn-more-about-nnj">Want to learn more about nnj?</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
 <li><a class="reference internal" href="#links">Links:</a></li>
 </ul>
 </li>

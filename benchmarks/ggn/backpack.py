@@ -7,14 +7,12 @@ from benchmarks.models import linear_model
 from benchmarks.timer import Timer
 
 
-class GGNExact():
+class GGNExact:
     def __init__(self, model: nn.Sequential, lossfunc: nn.Module):
-
         self.lossfunc = extend(lossfunc)
         self.model = extend(model)
 
     def ggn(self, X: torch.tensor, y: torch.Tensor) -> torch.Tensor:
-
         f = self.model(X)
         loss = self.lossfunc(f, y)
         with backpack(DiagGGNExact()):
@@ -24,14 +22,12 @@ class GGNExact():
         return dggn
 
 
-class GGNStochastic():
+class GGNStochastic:
     def __init__(self, model: nn.Sequential, lossfunc: nn.Module):
-
         self.lossfunc = extend(lossfunc)
         self.model = extend(model)
 
     def ggn(self, X: torch.tensor, y: torch.Tensor) -> torch.Tensor:
-
         f = self.model(X)
         loss = self.lossfunc(f, y)
         with backpack(DiagGGNMC()):
@@ -42,7 +38,6 @@ class GGNStochastic():
 
 
 if __name__ == "__main__":
-
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
     X = torch.randn(10, 100, device="cuda")

@@ -139,9 +139,22 @@
         
         
         
-        <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+        <p class="caption" role="heading"><span class="caption-text">Learn about nnj</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apis/nnj.html">Jacobian products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-backpropagation">Chain rule (backpropagation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-of-hessian-backpropagation-of-hessian">Chain rule of Hessian (backpropagation of Hessian)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#nnj-a-more-efficient-backpropagation-of-hessian-approximations">NNJ: A more efficient backpropagation of Hessian approximations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#getting-started">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">AbstractDiagonalJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">AbstractJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/linear.html">Linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/relu.html">ReLU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/sequential.html">Sequential</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/tanh.html">Tanh</a></li>
 </ul>
 
         
@@ -217,6 +230,7 @@
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
@@ -225,11 +239,11 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian">AbstractDiagonalJacobian (class in nnj)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian">AbstractDiagonalJacobian (class in nnj)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractJacobian">AbstractJacobian (class in nnj)</a>
+      <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian">AbstractJacobian (class in nnj)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -237,7 +251,7 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.Sequential.forward">forward() (nnj.Sequential method)</a>
+      <li><a href="apis/sequential.html#nnj.Sequential.forward">forward() (nnj.Sequential method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -245,50 +259,60 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.jacobian">jacobian() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.jacobian">jacobian() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.AbstractJacobian.jacobian">(nnj.AbstractJacobian method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.jacobian">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Linear.jacobian">(nnj.Linear method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.jacobian">(nnj.Linear method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.jacobian">(nnj.Sequential method)</a>
+        <li><a href="apis/relu.html#nnj.ReLU.jacobian">(nnj.ReLU method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Tanh.jacobian">(nnj.Tanh method)</a>
+        <li><a href="apis/sequential.html#nnj.Sequential.jacobian">(nnj.Sequential method)</a>
+</li>
+        <li><a href="apis/tanh.html#nnj.Tanh.jacobian">(nnj.Tanh method)</a>
 </li>
       </ul></li>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.jmjTp">jmjTp() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.jmjTp">jmjTp() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.jmjTp">(nnj.Linear method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.jmjTp">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.jmjTp">(nnj.Sequential method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.jmjTp">(nnj.Linear method)</a>
+</li>
+        <li><a href="apis/sequential.html#nnj.Sequential.jmjTp">(nnj.Sequential method)</a>
+</li>
+      </ul></li>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.jmp">jmp() (nnj.AbstractDiagonalJacobian method)</a>
+
+      <ul>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.jmp">(nnj.AbstractJacobian method)</a>
+</li>
+        <li><a href="apis/linear.html#nnj.Linear.jmp">(nnj.Linear method)</a>
+</li>
+        <li><a href="apis/sequential.html#nnj.Sequential.jmp">(nnj.Sequential method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.jmp">jmp() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.jTmjp">jTmjp() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.jmp">(nnj.Linear method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.jTmjp">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.jmp">(nnj.Sequential method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.jTmjp">(nnj.Linear method)</a>
+</li>
+        <li><a href="apis/sequential.html#nnj.Sequential.jTmjp">(nnj.Sequential method)</a>
 </li>
       </ul></li>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.jTmjp">jTmjp() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.jvp">jvp() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.jTmjp">(nnj.Linear method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.jvp">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.jTmjp">(nnj.Sequential method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.jvp">(nnj.Linear method)</a>
 </li>
-      </ul></li>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.jvp">jvp() (nnj.AbstractDiagonalJacobian method)</a>
-
-      <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.jvp">(nnj.Linear method)</a>
-</li>
-        <li><a href="apis/nnj.html#nnj.Sequential.jvp">(nnj.Sequential method)</a>
+        <li><a href="apis/sequential.html#nnj.Sequential.jvp">(nnj.Sequential method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -297,7 +321,7 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.Linear">Linear (class in nnj)</a>
+      <li><a href="apis/linear.html#nnj.Linear">Linear (class in nnj)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -305,21 +329,31 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.mjp">mjp() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.mjp">mjp() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.mjp">(nnj.Linear method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.mjp">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.mjp">(nnj.Sequential method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.mjp">(nnj.Linear method)</a>
+</li>
+        <li><a href="apis/sequential.html#nnj.Sequential.mjp">(nnj.Sequential method)</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apis/relu.html#nnj.ReLU">ReLU (class in nnj)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.Sequential">Sequential (class in nnj)</a>
+      <li><a href="apis/sequential.html#nnj.Sequential">Sequential (class in nnj)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -327,7 +361,7 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.Tanh">Tanh (class in nnj)</a>
+      <li><a href="apis/tanh.html#nnj.Tanh">Tanh (class in nnj)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -335,12 +369,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apis/nnj.html#nnj.AbstractDiagonalJacobian.vjp">vjp() (nnj.AbstractDiagonalJacobian method)</a>
+      <li><a href="apis/abstract_diagonal_jacobian.html#nnj.AbstractDiagonalJacobian.vjp">vjp() (nnj.AbstractDiagonalJacobian method)</a>
 
       <ul>
-        <li><a href="apis/nnj.html#nnj.Linear.vjp">(nnj.Linear method)</a>
+        <li><a href="apis/abstract_jacobian.html#nnj.AbstractJacobian.vjp">(nnj.AbstractJacobian method)</a>
 </li>
-        <li><a href="apis/nnj.html#nnj.Sequential.vjp">(nnj.Sequential method)</a>
+        <li><a href="apis/linear.html#nnj.Linear.vjp">(nnj.Linear method)</a>
+</li>
+        <li><a href="apis/sequential.html#nnj.Sequential.vjp">(nnj.Sequential method)</a>
 </li>
       </ul></li>
   </ul></td>

@@ -12,11 +12,7 @@ class ReLU(AbstractDiagonalJacobian, nn.ReLU):
         self._n_params = 0
 
     def jacobian(
-        self, 
-        x: Tensor, 
-        val: Union[Tensor, None] = None, 
-        wrt: Literal["input", "weight"] = "input", 
-        diag: bool = False
+        self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input", diag: bool = False
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         if wrt == "input":

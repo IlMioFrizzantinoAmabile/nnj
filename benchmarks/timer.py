@@ -3,12 +3,9 @@ import torch
 
 
 class Timer:
-    def time(self, 
-             func, 
-             dummy_input: torch.Tensor, 
-             dummy_label: torch.Tensor, 
-             repetitions: int = 300
-        ) -> tuple((float, float)):
+    def time(
+        self, func, dummy_input: torch.Tensor, dummy_label: torch.Tensor, repetitions: int = 300
+    ) -> tuple((float, float)):
         # INIT LOGGERS
         starter = torch.cuda.Event(enable_timing=True)
         ender = torch.cuda.Event(enable_timing=True)

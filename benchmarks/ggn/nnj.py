@@ -1,18 +1,15 @@
 import torch
 
 import nnj
-
 from benchmarks.models import linear_model
 from benchmarks.timer import Timer
 
 
-class GGN():
+class GGN:
     def __init__(self, model: nnj.Sequential):
-
         self.model = nnj.utils.convert_to_nnj(model)
 
     def ggn(self, X: torch.tensor, y: torch.Tensor) -> torch.Tensor:
-
         # backpropagate through the network
         with torch.no_grad():
             Jt_J = self.model.jTmjp(
@@ -24,7 +21,7 @@ class GGN():
                 from_diag=False,
                 diag_backprop=False,  # approximates the diagonal elements of the Hessian
             )
-            
+
             # average along batch size
             Jt_J = torch.mean(Jt_J, dim=0)
 
@@ -32,7 +29,6 @@ class GGN():
 
 
 if __name__ == "__main__":
-
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
     X = torch.randn(10, 100, device="cuda:0")

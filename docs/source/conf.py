@@ -35,6 +35,8 @@ templates_path = ["_templates"]
 
 # html_theme = "furo"
 
+autodoc_member_order = "bysource"
+
 html_theme = "pytorch_sphinx_theme"
 html_theme_path = [pytorch_sphinx_theme.get_html_theme_path()]
 html_static_path = ["_static"]
