@@ -12,7 +12,6 @@ import nnj
 
 
 def test_jvp_wrt_input(layer, x):
-
     tangent_vector_input = torch.randn(*x.shape)
 
     jacobian = layer._jacobian(x, None, wrt="input")
@@ -24,7 +23,6 @@ def test_jvp_wrt_input(layer, x):
 
 
 def test_jvp_wrt_weight(layer, x):
-
     batch_size = x.shape[0]
     tangent_vector_params = torch.randn((batch_size, layer._n_params))
 
@@ -40,7 +38,6 @@ def test_jvp_wrt_weight(layer, x):
 
 
 def test_vjp_wrt_input(layer, x):
-
     output_shape = layer.forward(x).shape
     tangent_vector_output = torch.randn(*output_shape)
 
@@ -53,7 +50,6 @@ def test_vjp_wrt_input(layer, x):
 
 
 def test_vjp_wrt_weight(layer, x):
-
     output_shape = layer.forward(x).shape
     tangent_vector_output = torch.randn(*output_shape)
 
@@ -74,7 +70,6 @@ def test_vjp_wrt_weight(layer, x):
 
 
 def test_jmp_wrt_input(layer, x):
-
     n_columns = 7
     batch_size = x.shape[0]
     tangent_matrix_input = torch.randn(batch_size, x.shape[1:].numel(), n_columns)
@@ -88,7 +83,6 @@ def test_jmp_wrt_input(layer, x):
 
 
 def test_jmp_wrt_weight(layer, x):
-
     n_columns = 7
     batch_size = x.shape[0]
     tangent_matrix_params = torch.randn((batch_size, layer._n_params, n_columns))
@@ -105,7 +99,6 @@ def test_jmp_wrt_weight(layer, x):
 
 
 def test_mjp_wrt_input(layer, x):
-
     n_rows = 7
     batch_size = x.shape[0]
     output_shape = layer.forward(x).shape
@@ -120,7 +113,6 @@ def test_mjp_wrt_input(layer, x):
 
 
 def test_mjp_wrt_weight(layer, x):
-
     n_rows = 7
     batch_size = x.shape[0]
     output_shape = layer.forward(x).shape
@@ -143,7 +135,6 @@ def test_mjp_wrt_weight(layer, x):
 
 
 def test_jmjTp_wrt_input(layer, x, from_diag=False, to_diag=False):
-
     batch_size = x.shape[0]
     jacobian = layer._jacobian(x, None, wrt="input")
 
@@ -178,7 +169,6 @@ def test_jmjTp_wrt_input(layer, x, from_diag=False, to_diag=False):
 
 
 def test_jmjTp_wrt_weight(layer, x, from_diag=False, to_diag=False):
-
     if layer._n_params == 0:
         return  # should check that .jmjTp returns None in all cases
 
@@ -209,7 +199,6 @@ def test_jmjTp_wrt_weight(layer, x, from_diag=False, to_diag=False):
 
 
 def test_jTmjp_wrt_input(layer, x, from_diag=False, to_diag=False):
-
     output_shape = layer.forward(x).shape
     batch_size = x.shape[0]
     jacobian = layer._jacobian(x, None, wrt="input")
@@ -247,7 +236,6 @@ def test_jTmjp_wrt_input(layer, x, from_diag=False, to_diag=False):
 
 
 def test_jTmjp_wrt_weight(layer, x, from_diag=False, to_diag=False):
-
     if layer._n_params == 0:
         return  # should check that .jmjTp returns None in all cases
 
@@ -284,7 +272,6 @@ def test_jTmjp_wrt_weight(layer, x, from_diag=False, to_diag=False):
 
 
 if __name__ == "__main__":
-
     # define some input data
     xs = [
         torch.randn(7, 3),

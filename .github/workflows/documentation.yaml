@@ -1,0 +1,27 @@
+name: Docs
+on: [push, pull_request, workflow_dispatch]
+permissions:
+    contents: write
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          pip install -e .
+      - name: Install dependencies
+        run: |
+          pip install sphinx==5.2.1 sphinx-copybutton==0.5.0 sphinx-design==0.2.0 sphinx_rtd_theme git+https://github.com/liruilong940607/pytorch_sphinx_theme.git#egg=pytorch_sphinx_theme          
+      - name: Sphinx build
+        run: |
+          sphinx-build docs/source docs/build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/
+          force_orphan: true

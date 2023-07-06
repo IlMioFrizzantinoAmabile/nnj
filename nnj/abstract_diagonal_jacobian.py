@@ -12,7 +12,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     In these cases the forward and backward functions can be efficiently implemented in a general form
     """
 
-    def _jacobian(
+    def jacobian(
         self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input", diag: bool = False
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
@@ -23,29 +23,29 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         """
         jacobian vector product
         """
-        diag_jacobian = self._jacobian(x, val, wrt=wrt, diag=True)
+        diag_jacobian = self.jacobian(x, val, wrt=wrt, diag=True)
         if diag_jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bj,bj->bj", diag_jacobian, vector)
 
-    def _jmp(
+    def jmp(
         self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
     ) -> Union[Tensor, None]:
         """
         jacobian matrix product
         """
         if matrix is None:
-            return self._jacobian(x, val, wrt=wrt, diag=False)
-        diag_jacobian = self._jacobian(x, val, wrt=wrt, diag=True)
+            return self.jacobian(x, val, wrt=wrt, diag=False)
+        diag_jacobian = self.jacobian(x, val, wrt=wrt, diag=True)
         if diag_jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bi,bi...->bi...", diag_jacobian, matrix)
 
-    def _jmjTp(
+    def jmjTp(
         self,
         x: Tensor,
         val: Tensor,
@@ -88,7 +88,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+    def vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
         """
         vector jacobian product
         """
@@ -97,7 +97,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bi,bi->bi", vector, diag_jacobian)
 
-    def _mjp(
+    def mjp(
         self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input"
     ) -> Union[Tensor, None]:
         """
@@ -110,7 +110,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bij,bj->bij", matrix, diag_jacobian)
 
-    def _jTmjp(
+    def jTmjp(
         self,
         x: Tensor,
         val: Union[Tensor, None],
@@ -129,7 +129,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
         if matrix is None:
             matrix = torch.ones_like(val).reshape(b, -1)
             from_diag = True
-        diag_jacobian = self._jacobian(x, val, wrt=wrt, diag=True)
+        diag_jacobian = self.jacobian(x, val, wrt=wrt, diag=True)
         if diag_jacobian is None:  # non parametric layer
             return None
         if not from_diag and not to_diag:

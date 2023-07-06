@@ -35,7 +35,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             x = val
         return x
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
+    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         return self._mjp(x, val, None, wrt=wrt)
 
@@ -43,14 +43,14 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         jacobian vector product
         """
         if wrt == "input":
             for module in self._modules.values():
                 val = module(x)
-                vector = module._jvp(x, val, vector, wrt=wrt)
+                vector = module.jvp(x, val, vector, wrt=wrt)
                 x = val
             return vector
         elif wrt == "weight":
@@ -58,8 +58,8 @@ class Sequential(AbstractJacobian, nn.Sequential):
             jvp = None
             for module in self._modules.values():
                 val = module(x)
-                jvp = module._jvp(x, val, jvp, wrt="input") if jvp is not None else None
-                jvp_from_layer = module._jvp(x, val, vector[:, p : p + module._n_params], wrt="weight")
+                jvp = module.jvp(x, val, jvp, wrt="input") if jvp is not None else None
+                jvp_from_layer = module.jvp(x, val, vector[:, p : p + module._n_params], wrt="weight")
                 if jvp_from_layer is not None:
                     if jvp is None:
                         jvp = jvp_from_layer
@@ -70,16 +70,16 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jvp
 
-    def _jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         jacobian matrix product
         """
         if matrix is None:
-            return self._jacobian(x, val, wrt=wrt)
+            return self.jacobian(x, val, wrt=wrt)
         if wrt == "input":
             for module in self._modules.values():
                 val = module(x)
-                matrix = module._jmp(x, val, matrix, wrt=wrt)
+                matrix = module.jmp(x, val, matrix, wrt=wrt)
                 x = val
             return matrix
         elif wrt == "weight":
@@ -87,8 +87,8 @@ class Sequential(AbstractJacobian, nn.Sequential):
             jmp = None
             for module in self._modules.values():
                 val = module(x)
-                jmp = module._jmp(x, val, jmp, wrt="input") if jmp is not None else None
-                jmp_from_layer = module._jmp(x, val, matrix[:, p : p + module._n_params, :], wrt="weight")
+                jmp = module.jmp(x, val, jmp, wrt="input") if jmp is not None else None
+                jmp_from_layer = module.jmp(x, val, matrix[:, p : p + module._n_params, :], wrt="weight")
                 if jmp_from_layer is not None:
                     if jmp is None:
                         jmp = jmp_from_layer
@@ -99,7 +99,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jmp
 
-    def _jmjTp(
+    def jmjTp(
         self,
         x: Tensor,
         val: Union[Tensor, None],
@@ -122,7 +122,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             # forward pass again
             for k in range(len(self._modules_list)):
                 # propagate through the input
-                matrix = self._modules_list[k]._jmjTp(
+                matrix = self._modules_list[k].jmjTp(
                     self.feature_maps[k],
                     self.feature_maps[k + 1],
                     matrix,
@@ -153,7 +153,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             for k in range(len(self._modules_list)):
                 # propagate through the input
                 if jmjTp is not None:
-                    jmjTp = self._modules_list[k]._jmjTp(
+                    jmjTp = self._modules_list[k].jmjTp(
                         self.feature_maps[k],
                         self.feature_maps[k + 1],
                         jmjTp,
@@ -163,7 +163,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
                         diag_backprop=diag_backprop,
                     )
                 # propagate through the weight
-                jmjTp_from_layer = self._modules_list[k]._jmjTp(
+                jmjTp_from_layer = self._modules_list[k].jmjTp(
                     self.feature_maps[k],
                     self.feature_maps[k + 1],
                     matrix[k],
@@ -183,7 +183,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         vector jacobian product
         """
@@ -196,19 +196,19 @@ class Sequential(AbstractJacobian, nn.Sequential):
         for k in range(len(self._modules_list) - 1, -1, -1):
             # backpropagate through the weight
             if wrt == "weight":
-                v_k = self._modules_list[k]._vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="weight")
+                v_k = self._modules_list[k].vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="weight")
                 if v_k is not None:
                     vs = v_k + vs if isinstance(v_k, list) else [v_k] + vs
                 if k == 0:
                     break
             # backpropagate through the input
-            vector = self._modules_list[k]._vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="input")
+            vector = self._modules_list[k].vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="input")
         if wrt == "weight":
             return torch.cat(vs, dim=1)
         elif wrt == "input":
             return vector
 
-    def _mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         matrix jacobian product
         """
@@ -235,7 +235,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         elif wrt == "input":
             return matrix
 
-    def _jTmjp(
+    def jTmjp(
         self,
         x: Tensor,
         val: Union[Tensor, None],
@@ -259,7 +259,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         for k in range(len(self._modules_list) - 1, -1, -1):
             # backpropagate through the weight
             if wrt == "weight":
-                m_k = self._modules_list[k]._jTmjp(
+                m_k = self._modules_list[k].jTmjp(
                     self.feature_maps[k],
                     self.feature_maps[k + 1],
                     matrix,
@@ -273,7 +273,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
                 if k == 0:
                     break
             # backpropagate through the input
-            matrix = self._modules_list[k]._jTmjp(
+            matrix = self._modules_list[k].jTmjp(
                 self.feature_maps[k],
                 self.feature_maps[k + 1],
                 matrix,

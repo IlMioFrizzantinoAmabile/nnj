@@ -11,7 +11,7 @@ class Linear(nn.Linear, AbstractJacobian):
         super().__init__(*args, **kwargs)
         self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
+    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         b, c1 = x.shape
         if wrt == "input":
@@ -30,7 +30,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def jvp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         jacobian vector product
         """
@@ -47,12 +47,12 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].view(b, c2, c1), x) + vector[:, c2 * c1 :]
 
-    def _jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def jmp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         jacobian matrix product
         """
         if matrix is None:
-            return self._jacobian(x, val, wrt=wrt)
+            return self.jacobian(x, val, wrt=wrt)
         if wrt == "input":
             return torch.einsum("kj,bji->bki", self.weight, matrix)
         elif wrt == "weight":
@@ -69,7 +69,7 @@ class Linear(nn.Linear, AbstractJacobian):
                     + matrix[:, c2 * c1 :, :]
                 )
 
-    def _jmjTp(
+    def jmjTp(
         self,
         x: Tensor,
         val: Union[Tensor, None],
@@ -107,9 +107,9 @@ class Linear(nn.Linear, AbstractJacobian):
             if not from_diag and not to_diag:
                 # full -> full
                 matrixT = matrix.transpose(1, 2)
-                jmTp = self._jmp(x, val, matrixT, wrt=wrt)
+                jmTp = self.jmp(x, val, matrixT, wrt=wrt)
                 mjTp = jmTp.transpose(1, 2)
-                jmjTp = self._jmp(x, val, mjTp, wrt=wrt)
+                jmjTp = self.jmp(x, val, mjTp, wrt=wrt)
                 return jmjTp
             elif from_diag and not to_diag:
                 # diag -> full
@@ -143,7 +143,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
+    def vjp(self, x: Tensor, val: Union[Tensor, None], vector: Tensor, wrt: Literal = "input") -> Tensor:
         """
         vector jacobian product
         """
@@ -156,12 +156,12 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
 
-    def _mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
+    def mjp(self, x: Tensor, val: Union[Tensor, None], matrix: Union[Tensor, None], wrt: Literal = "input") -> Tensor:
         """
         matrix jacobian product
         """
         if matrix is None:
-            return self._jacobian(x, val, wrt=wrt)
+            return self.jacobian(x, val, wrt=wrt)
         if wrt == "input":
             return torch.einsum("bij,jk->bik", matrix, self.weight)
         elif wrt == "weight":
@@ -173,7 +173,7 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.cat([torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1), matrix], dim=2)
 
-    def _jTmjp(
+    def jTmjp(
         self,
         x: Tensor,
         val: Union[Tensor, None],
@@ -208,14 +208,14 @@ class Linear(nn.Linear, AbstractJacobian):
             if not from_diag and not to_diag:
                 # full -> full
                 matrixT = matrix.transpose(1, 2)
-                mTjp = self._mjp(x, val, matrixT, wrt=wrt)
+                mTjp = self.mjp(x, val, matrixT, wrt=wrt)
                 jTmp = mTjp.transpose(1, 2)
-                jTmjp = self._jmp(x, val, jTmp, wrt=wrt)
+                jTmjp = self.jmp(x, val, jTmp, wrt=wrt)
                 return jTmjp
             elif from_diag and not to_diag:
                 # diag -> full
                 # TODO: improve efficiency
-                jacobian = self._jacobian(x, val, wrt=wrt)
+                jacobian = self.jacobian(x, val, wrt=wrt)
                 return torch.einsum("bji,bj,bjq->biq", jacobian, matrix, jacobian)
             elif not from_diag and to_diag:
                 # full -> diag

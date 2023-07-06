@@ -12,7 +12,7 @@ class AbstractJacobian:
     - pull back and push forward metrics
     """
 
-    def _jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Union[Tensor, None]:
+    def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal = "input") -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         # this function has to be implemented for every new nnj layer
         raise NotImplementedError
@@ -21,19 +21,19 @@ class AbstractJacobian:
     ### forward passes ###
     ######################
 
-    def _jvp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
-        jacobian = self._jacobian(x, val, wrt=wrt)
+    def jvp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bj->bi", jacobian, vector)
 
-    def _jmp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
-        jacobian = self._jacobian(x, val, wrt=wrt)
+    def jmp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bjk->bik", jacobian, matrix)
 
-    def _jmjTp(
+    def jmjTp(
         self,
         x: Tensor,
         val: Tensor,
@@ -45,7 +45,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, None]:
         if diag_backprop:  # TODO
             raise NotImplementedError
-        jacobian = self._jacobian(x, val, wrt=wrt)
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         if not from_diag and not to_diag:
@@ -65,19 +65,19 @@ class AbstractJacobian:
     ### backward passes ###
     #######################
 
-    def _vjp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
-        jacobian = self._jacobian(x, val, wrt=wrt)
+    def vjp(self, x: Tensor, val: Tensor, vector: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bi,bij->bj", vector, jacobian)
 
-    def _mjp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
-        jacobian = self._jacobian(x, val, wrt=wrt)
+    def mjp(self, x: Tensor, val: Tensor, matrix: Tensor, wrt: Literal = "input") -> Union[Tensor, None]:
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         return torch.einsum("bij,bjk->bik", matrix, jacobian)
 
-    def _jTmjp(
+    def jTmjp(
         self,
         x: Tensor,
         val: Tensor,
@@ -90,7 +90,7 @@ class AbstractJacobian:
         if diag_backprop:
             # TODO: better error message
             raise NotImplementedError
-        jacobian = self._jacobian(x, val, wrt=wrt)
+        jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
         if not from_diag and not to_diag:
