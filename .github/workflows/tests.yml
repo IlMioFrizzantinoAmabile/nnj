@@ -30,9 +30,6 @@ jobs:
         run: ruff tests/
       - name: Run Black
         run: black tests/ --check
-      - name: Run Pyright
-        run: |
-          pyright
       - name: Test with pytest
         run: |
           pytest

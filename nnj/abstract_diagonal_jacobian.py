@@ -9,7 +9,8 @@ from nnj.abstract_jacobian import AbstractJacobian
 class AbstractDiagonalJacobian(AbstractJacobian):
     """
     Superclass specific for layers whose Jacobian is a diagonal matrix.
-    In these cases the forward and backward functions can be efficiently implemented in a general form
+    In these cases the forward and backward functions can be efficiently
+    implemented in a general form
     """
 
     def jacobian(
