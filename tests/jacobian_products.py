@@ -6,7 +6,6 @@ import torch
 
 import nnj
 
-
 # define some input data
 xs = [
     torch.randn(7, 3),
@@ -267,6 +266,7 @@ def test_jmjTp_wrt_weight():
                             )
 
                     assert jmjTp_fast.shape == jmjTp_slow.shape
+                    print(torch.abs(jmjTp_fast -jmjTp_slow).sum())
                     assert torch.isclose(jmjTp_fast, jmjTp_slow, atol=1e-4).all()
 
 
