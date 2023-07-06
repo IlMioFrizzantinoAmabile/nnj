@@ -24,13 +24,16 @@ to_test_easy = [
     nnj.Linear(3, 5, bias=False),
     nnj.Linear(3, 5),
     nnj.Tanh(),
+    nnj.ReLU(),
 ]
 to_test_advanced = [
     nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13), add_hooks=True),
+    nnj.Sequential(nnj.Linear(3, 5), nnj.ReLU(), nnj.Linear(5, 13), add_hooks=True),
     nnj.Sequential(
         nnj.Linear(3, 5),
         nnj.Tanh(),
         nnj.Linear(5, 2),
+        nnj.Tanh(),
         nnj.Tanh(),
         nnj.Linear(2, 13),
         nnj.Tanh(),
@@ -45,7 +48,7 @@ to_test_advanced = [
             nnj.Linear(5, 2),
             add_hooks=True,
         ),
-        nnj.Tanh(),
+        nnj.ReLU(),
         nnj.Linear(2, 13),
         add_hooks=True,
     ),
@@ -85,7 +88,7 @@ def test_jacobian_wrt_weight():
 
             jacobian_nnj = layer.jacobian(x, None, wrt="weight")
             if layer._n_params == 0:
-                assert jacobian_nnj == None
+                assert jacobian_nnj is None
                 continue
 
             jacobian_nn = torch.zeros(batch_size, out_size, param_size)
