@@ -1,13 +1,59 @@
 .. _introduction:
 
-Introduction
-===================================
+Overview
+=============
 
-Blablabla
+A function :math:`f: \mathcal{X}\rightarrow\mathcal{Y}` induces a map between directions :math:`v\in\mathcal{X}` to directions :math:`w\in\mathcal{Y}` such that :math:`f(x + v) = f(x) + w`, when the step is *small*. 
+This map is known as the derivative :math:`\nabla f` and, when evaluated in a specific point :math:`\nabla f: x\in\mathcal{X}`, it is a linear operator :math:`\nabla f(x): T_x\mathcal{X}\rightarrow T_{f(x)}\mathcal{Y}` between the tangent space in :math:`x` and the tangent space in :math:`f(x)`. 
+
+The linear operator is just a matrix multiplication, the matrix is called **Jacobian** and it is usually identified with the same notation as the linear operator itself :math:`J=\nabla f(x)`.
+
+The forward *direction* pass **JVP** (Jacobian Vector Product) is
+
+.. math::
+    \begin{aligned}
+    J \cdot v \in  T_{f(x)}\mathcal{Y}
+    \qquad\qquad \forall v\in  T_x\mathcal{X}
+    \end{aligned}
+
+The backward *direction* pass **VJP** (Vector Jacobian Product) is
+
+.. math::
+    \begin{aligned}
+    J^\top \cdot w \in  T_x\mathcal{X}
+    \qquad \forall w\in  T_{f(x)}\mathcal{Y}
+    \end{aligned}
 
 
-Notation
-===================================
+The forward *metric* pass **JMJtP** (Jacobian Matrix Jacobian transpose Product) is
+
+.. math::
+    \begin{aligned}
+    J \cdot M \cdot J^\top \in  \mathfrak{M}(T_{f(x)}\mathcal{Y})
+    \qquad\qquad \forall M\in \mathfrak{M}(T_x\mathcal{X})
+    \end{aligned}
+
+The backward *metric* pass **JtMJP** (Jacobian transpose Matrix Jacobian Product) is
+
+.. math::
+    \begin{aligned}
+    J^\top \cdot M \cdot J \in  \mathfrak{M}(T_x\mathcal{X})
+    \qquad\qquad \forall M\in \mathfrak{M}(T_{f(x)}\mathcal{Y})
+    \end{aligned}
+
+The first two jacobian products are more common and supported by several repos (like JAX), while the latter are more specific and not commonly supported. 
+The scope of this repository is to provide efficent implementation of these jacobian products for all PyTorch *modules*.
+In PyTorch, objects of the class *module* are the building blocks for functions, they can be either parametric layer (as linear or convolutions) or non-parametric layer (as tanh or relu). 
+Moreover, composition of modules is a module itself (sequential) and even arbitrary function of other modules can be a module (as skip-connection or res-block or attention). 
+
+
+Jacobian in a neural network
+==============================
+A neural network is actually a function with two inputs, a data and a parameter. And thus there are actually two different Jacobian to consider.
+
+
+Composition of functions (aka. Sequential)
+===========================================
 
 Given a data space :math:`\mathcal{X}` and a label space :math:`\mathcal{Y}`, consider a Neural Network (NN) :math:`f_\theta:\mathcal{X}\rightarrow\mathcal{Y}` with  :math:`L` layers. The parameter  :math:`\theta = (\theta_1, \dots, \theta_L) \in\Theta` is the concatenation of the parameters :math:`\theta_i` for each layer  :math:`i \in \{1,...,L \}`. 
 
@@ -124,16 +170,6 @@ The intuition for the chain rule is that the Jacobian :math:`J_{\theta_i}f_{\the
 the Jacobian w.r.t.\@ the \emph{parameters} :math:`J_{\theta_i}f^{(i)}_{\theta_i}(x_{i-1})` of the specific layer :math:`i`. Thus, we can reuse computation for one layer to improve the computation of other layers, specifically the product of Jacobians w.r.t.\@ the input.
 
 
-
-Chain rule of Hessian (backpropagation of Hessian)
-======================================================================
-
-
-
-
-
-NNJ: A more efficient backpropagation of Hessian approximations
-======================================================================
 
 
 
