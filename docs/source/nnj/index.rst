@@ -55,6 +55,14 @@ A neural network is actually a function with two inputs, a data and a parameter.
 Composition of functions (aka. Sequential)
 ===========================================
 
+.. video:: ../_static/images/backprop-hessian.mp4
+  :alt: Backprop hessian illustration
+  :width: 800
+  :nocontrols:
+  :loop:
+  :autoplay: 
+  :muted:
+
 Given a data space :math:`\mathcal{X}` and a label space :math:`\mathcal{Y}`, consider a Neural Network (NN) :math:`f_\theta:\mathcal{X}\rightarrow\mathcal{Y}` with  :math:`L` layers. The parameter  :math:`\theta = (\theta_1, \dots, \theta_L) \in\Theta` is the concatenation of the parameters :math:`\theta_i` for each layer  :math:`i \in \{1,...,L \}`. 
 
 The NN is a composition of  :math:`L` functions  :math:`f^{(1)},f^{(2)},\dots,f^{(L)}`, where :math:`f^{(i)}` is parametrized by :math:`\theta_{i}`.
