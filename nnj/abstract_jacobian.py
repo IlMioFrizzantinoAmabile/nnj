@@ -19,9 +19,20 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        Returns the Jacobian matrix
+        Returns the Jacobian matrix of the layer evaluated in x
+
+        .. math::
+            \nabla_{\text{wrt}} layer(x)
+
+        .. note::
+            This method has to be implemented for every new nnj layer. Then all other jacobian products are usable.
+
+        Args:
+            x: The input of the layer.
+            val: The output of the layer.
+            wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
+
         """
-        # this function has to be implemented for every new nnj layer
         raise NotImplementedError
 
     ######################
@@ -36,7 +47,17 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        jacobian vector product
+        Returns the Jacobian vector product
+
+        .. math::
+            jvp(x,vector) = \nabla_{\text{wrt}} layer(x) \cdot vector
+
+        Args:
+            x: The input of the layer.
+            val: The output of the layer.
+            vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input"
+            wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
+
         """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
