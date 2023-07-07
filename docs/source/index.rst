@@ -46,6 +46,22 @@ The document seek to provide a simple introduction to the nnj and how to use it 
    nnj/*
 
 
+
+Wandering why not just use Jax?
+==============================================================
+
+
+Check out our comparison, e.g. start reading our :ref:`Ok, but why<why>`  to learn more about it.
+
+.. toctree::
+   :glob:
+   :hidden:
+   :caption: Ok, but why?
+
+   why/*
+   
+
+
 Usage
 ===============================
 

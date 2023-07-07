@@ -57,7 +57,7 @@ html_theme_options = {
     # dropdown menu containing a list of links.
     "menu": [
         # A link
-        # {"name": "GitHub", "url": "https://github.com/KAIR-BAIR/nerfacc"},
+        # {"name": "GitHuuub", "url": "https://github.com/KAIR-BAIR/nerfacc"},
         # A dropdown menu
         # {
         #     "name": "Projects",
@@ -95,3 +95,28 @@ epub_show_urls = "footnote"
 
 # typehints
 autodoc_typehints = "description"
+
+latex_engine = 'xelatex'
+latex_elements = {
+    'fontpkg': r'''
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+''',
+    'preamble': r'''
+\usepackage[titles]{tocloft}
+\cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
+\setlength{\cftchapnumwidth}{0.75cm}
+\setlength{\cftsecindent}{\cftchapnumwidth}
+\setlength{\cftsecnumwidth}{1.25cm}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{algorithm} %added for pseudocode
+\usepackage{algpseudocode} %added for pseudocode
+''',
+    'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
+    'printindex': r'\footnotesize\raggedright\printindex',
+}
+latex_show_urls = 'footnote'
