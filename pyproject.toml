@@ -21,6 +21,7 @@ dependencies = [
     "pyright",
     "sphinx",
     "sphinx_rtd_theme",
+    "sphinxcontrib-video",
     "torch>=1.13.1",
 ]
 
