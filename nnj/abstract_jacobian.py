@@ -6,10 +6,10 @@ from torch import Tensor
 
 class AbstractJacobian:
     """Abstract class that:
-    - will overwrite the default behaviour of the forward method such that it
-    is also possible to return the jacobian
-    - propagate jacobian vector and jacobian matrix products, both forward and backward
-    - pull back and push forward metrics
+        - will overwrite the default behaviour of the forward method such that it
+        is also possible to return the jacobian
+        - propagate jacobian vector and jacobian matrix products, both forward and backward
+        - pull back and push forward metrics
     """
 
     def jacobian(
@@ -19,10 +19,10 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        Returns the Jacobian matrix of the layer evaluated in x
+        Compute the Jacobian matrix of the layer evaluated in x
 
         .. math::
-            \nabla_{\text{wrt}} layer(x)
+            ∇_{wrt} \,\, layer(x)
 
         .. note::
             This method has to be implemented for every new nnj layer. Then all other jacobian products are usable.
@@ -50,14 +50,19 @@ class AbstractJacobian:
         Returns the Jacobian vector product
 
         .. math::
-            jvp(x,vector) = \nabla_{\text{wrt}} layer(x) \cdot vector
-
+            jvp(x,vector) = ∇_{wrt} \,\, layer(x) * vector
+    
         Args:
             x: The input of the layer.
             val: The output of the layer.
-            vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input"
+            vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input". 
             wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
 
+        Shape:
+            - x: 
+            - val:
+            - vector:
+            - output:
         """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer

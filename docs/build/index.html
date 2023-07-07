@@ -144,10 +144,17 @@
         <p class="caption" role="heading"><span class="caption-text">Learn about nnj</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-backpropagation">Chain rule (backpropagation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#notation">Notation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-of-jacobian">Chain rule of Jacobian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html#chain-rule-of-hessian-backpropagation-of-hessian">Chain rule of Hessian (backpropagation of Hessian)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html#nnj-a-more-efficient-backpropagation-of-hessian-approximations">NNJ: A more efficient backpropagation of Hessian approximations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html#getting-started">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Ok, but why?</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="why/index.html">Why to use nnj?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why/index.html#why-not-jax">Why not Jax?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why/index.html#comparison">Comparison</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
@@ -237,12 +244,12 @@ All jacobian computations are implemented in native PyTorch.</p>
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
 <p><strong>Dependence</strong>: Please install Pytorch first.</p>
 <p>The easiest way is to install from PyPI:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pytorch-laplace
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>nnj
 </pre></div>
 </div>
 <p>Or install from source:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/FrederikWarburg/pytorch-laplace
-<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>pytorch-laplace
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/IlMioFrizzantinoAmabile/nnj
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>nnj
 <span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
@@ -251,6 +258,12 @@ All jacobian computations are implemented in native PyTorch.</p>
 <h1>Want to learn more about nnj?<a class="headerlink" href="#want-to-learn-more-about-nnj" title="Permalink to this heading">¶</a></h1>
 <p>Check out our educational content, e.g. start reading our <a class="reference internal" href="nnj/index.html#introduction"><span class="std std-ref">Introduction to nnj</span></a>  to learn more about the nnj.
 The document seek to provide a simple introduction to the nnj and how to use it in PyTorch.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="wandering-why-not-just-use-jax">
+<h1>Wandering why not just use Jax?<a class="headerlink" href="#wandering-why-not-just-use-jax" title="Permalink to this heading">¶</a></h1>
+<p>Check out our comparison, e.g. start reading our <a class="reference internal" href="why/index.html#why"><span class="std std-ref">Ok, but why</span></a>  to learn more about it.</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -348,6 +361,7 @@ The document seek to provide a simple introduction to the nnj and how to use it 
 <li><a class="reference internal" href="#">NNJ Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#want-to-learn-more-about-nnj">Want to learn more about nnj?</a></li>
+<li><a class="reference internal" href="#wandering-why-not-just-use-jax">Wandering why not just use Jax?</a></li>
 <li><a class="reference internal" href="#usage">Usage</a><ul>
 <li><a class="reference internal" href="#links">Links:</a></li>
 </ul>
