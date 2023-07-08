@@ -3,7 +3,7 @@ from typing import Literal, Union
 import torch
 from torch import nn, Tensor
 
-from nnj.abstract_jacobian import AbstractDiagonalJacobian
+from nnj.abstract_diagonal_jacobian import AbstractDiagonalJacobian
 
 
 class Sigmoid(AbstractDiagonalJacobian, nn.Sigmoid):
