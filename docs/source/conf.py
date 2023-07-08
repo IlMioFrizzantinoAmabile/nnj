@@ -98,14 +98,14 @@ epub_show_urls = "footnote"
 # typehints
 autodoc_typehints = "description"
 
-latex_engine = 'xelatex'
+latex_engine = "xelatex"
 latex_elements = {
-    'fontpkg': r'''
+    "fontpkg": r"""
 \setmainfont{DejaVu Serif}
 \setsansfont{DejaVu Sans}
 \setmonofont{DejaVu Sans Mono}
-''',
-    'preamble': r'''
+""",
+    "preamble": r"""
 \usepackage[titles]{tocloft}
 \cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
 \setlength{\cftchapnumwidth}{0.75cm}
@@ -117,8 +117,8 @@ latex_elements = {
 \usepackage{mathtools}
 \usepackage{algorithm} %added for pseudocode
 \usepackage{algpseudocode} %added for pseudocode
-''',
-    'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
-    'printindex': r'\footnotesize\raggedright\printindex',
+""",
+    "fncychap": r"\usepackage[Bjornstrup]{fncychap}",
+    "printindex": r"\footnotesize\raggedright\printindex",
 }
-latex_show_urls = 'footnote'
+latex_show_urls = "footnote"

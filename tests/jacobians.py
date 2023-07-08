@@ -25,6 +25,7 @@ to_test_easy = [
     nnj.Linear(3, 5),
     nnj.Tanh(),
     nnj.ReLU(),
+    nnj.Sigmoid(),
 ]
 to_test_advanced = [
     nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13), add_hooks=True),
@@ -52,6 +53,7 @@ to_test_advanced = [
         nnj.Linear(2, 13),
         add_hooks=True,
     ),
+    nnj.Sigmoid(),
 ]
 
 

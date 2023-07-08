@@ -6,10 +6,10 @@ from torch import Tensor
 
 class AbstractJacobian:
     """Abstract class that:
-        - will overwrite the default behaviour of the forward method such that it
-        is also possible to return the jacobian
-        - propagate jacobian vector and jacobian matrix products, both forward and backward
-        - pull back and push forward metrics
+    - will overwrite the default behaviour of the forward method such that it
+    is also possible to return the jacobian
+    - propagate jacobian vector and jacobian matrix products, both forward and backward
+    - pull back and push forward metrics
     """
 
     def jacobian(
@@ -51,15 +51,15 @@ class AbstractJacobian:
 
         .. math::
             jvp(x,vector) = ∇_{wrt} \,\, layer(x) * vector
-    
+
         Args:
             x: The input of the layer.
             val: The output of the layer.
-            vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input". 
+            vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input".
             wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
 
         Shape:
-            - x: 
+            - x:
             - val:
             - vector:
             - output:
