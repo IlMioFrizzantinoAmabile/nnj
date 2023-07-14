@@ -16,13 +16,13 @@ class Sigmoid(AbstractDiagonalJacobian, nn.Sigmoid):
         x: Tensor,
         val: Union[Tensor, None] = None,
         wrt: Literal["input", "weight"] = "input",
-        diag: bool = True,
+        diag: bool = False,
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         if wrt == "input":
             if val is None:
                 val = self.forward(x)
-            diag_jacobian = val * (1.0 - val)
+            diag_jacobian = (val * (1.0 - val)).reshape(val.shape[0], -1)
             if diag:
                 return diag_jacobian
             else:
