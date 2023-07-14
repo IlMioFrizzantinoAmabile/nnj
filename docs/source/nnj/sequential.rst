@@ -3,6 +3,9 @@
 Composition of functions (aka. Sequential)
 ===========================================
 
+.. note::
+    This is a work in progress. If you have any questions or suggestions, please open an issue on `GitHub <
+
 .. video:: ../_static/images/backprop-hessian.mp4
   :alt: Backprop hessian illustration
   :width: 800
@@ -48,13 +51,10 @@ Since we need explicit access to the intermediate values, we call the input :mat
 
 :math:`\xrightarrow{\hspace*{11em}}`
 :math:`  `
+:math:`\xrightarrow{\hspace*{1em}}`
 
 
 
-
-
-Chain rule of Jacobian
-======================================================================
 We are interested in the Jacobian :math:`\nabla_\theta f_\theta(x_0)` of the NN with respect to the parameter :math:`\theta`. Each column of the Jacobian is the derivative of the output vector w.r.t.\@ a single parameter. We can then group the parameters (i.e. columns) layer by layer
 
 .. math::

@@ -249,7 +249,6 @@
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html#efficient-implementation">Efficient implementation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nnj/index.html#getting-started">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nnj/sequential.html">Composition of functions (aka. Sequential)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nnj/sequential.html#chain-rule-of-jacobian">Chain rule of Jacobian</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Ok, but why?</span></p>
 <ul>
@@ -259,8 +258,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">AbstractDiagonalJacobian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">AbstractJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">Abstract Jacobian (diagonal)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">Abstract Jacobian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/linear.html">Linear</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/relu.html">ReLU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/sequential.html">Sequential</a></li>
@@ -344,8 +343,9 @@
               
   <section id="nnj-documentation">
 <h1>NNJ Documentation<a class="headerlink" href="#nnj-documentation" title="Permalink to this heading">¶</a></h1>
-<p>NNJ is torch.nn plus Jacobian operations. It efficiently implements both forward and backward passes of both directions and metrics in tangent spaces.
-It is a fast and more memory efficient extension of PyTorch.</p>
+<p>NNJ = torch.nn + Jacobian.</p>
+<p>Both forward and backward passes for both vector and metrics in tangent spaces are implemented for every module.
+This library is a fast and memory efficient extension of PyTorch.</p>
 <p>Github: <a class="reference external" href="https://github.com/IlMioFrizzantinoAmabile/nnj">https://github.com/IlMioFrizzantinoAmabile/nnj</a></p>
 <p>Authors: Marco Miani and Frederik Warburg</p>
 </section>
@@ -366,7 +366,8 @@ It is a fast and more memory efficient extension of PyTorch.</p>
 <section id="want-to-learn-more-about-nnj">
 <h1>Want to learn more about nnj?<a class="headerlink" href="#want-to-learn-more-about-nnj" title="Permalink to this heading">¶</a></h1>
 <p>Check out our educational content, e.g. start reading our <a class="reference internal" href="nnj/index.html#introduction"><span class="std std-ref">Introduction to nnj</span></a>  to learn more about the nnj.
-The document seek to provide a simple introduction to the nnj and how to use it in PyTorch.</p>
+The document seek to provide a simple introduction to nnj and to the functions it provides.</p>
+<p><a class="reference internal" href="nnj/sequential.html#sequential"><span class="std std-ref">Introduction to sequential</span></a></p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -416,8 +417,8 @@ The document seek to provide a simple introduction to the nnj and how to use it 
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">AbstractDiagonalJacobian</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">AbstractJacobian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_diagonal_jacobian.html">Abstract Jacobian (diagonal)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis/abstract_jacobian.html">Abstract Jacobian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/linear.html">Linear</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/relu.html">ReLU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apis/sequential.html">Sequential</a></li>

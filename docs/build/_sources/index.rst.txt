@@ -1,8 +1,10 @@
 NNJ Documentation
 ===================================
 
-NNJ is torch.nn plus Jacobian operations. It efficiently implements both forward and backward passes of both directions and metrics in tangent spaces.
-It is a fast and more memory efficient extension of PyTorch.
+NNJ = torch.nn + Jacobian. 
+
+Both forward and backward passes for both vector and metrics in tangent spaces are implemented for every module.
+This library is a fast and memory efficient extension of PyTorch.
 
 
 Github: https://github.com/IlMioFrizzantinoAmabile/nnj
@@ -35,7 +37,9 @@ Want to learn more about nnj?
 
 
 Check out our educational content, e.g. start reading our :ref:`Introduction to nnj<introduction>`  to learn more about the nnj.
-The document seek to provide a simple introduction to the nnj and how to use it in PyTorch.
+The document seek to provide a simple introduction to nnj and to the functions it provides.
+
+:ref:`Introduction to sequential<sequential>`
 
 .. toctree::
    :glob:

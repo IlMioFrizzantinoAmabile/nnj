@@ -7,11 +7,10 @@ from torch import Tensor
 class AbstractJacobian:
     """Abstract class that:
 
-    - will overwrite the default behaviour of the forward method such that it
-    is also possible to return the jacobian
+    - will overwrite the default behaviour of the forward method such that it is also possible to return the jacobian
 
     - propagate jacobian vector and jacobian matrix products, both forward and backward
-    
+
     - pull back and push forward metrics
     """
 
@@ -51,6 +50,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, None]:
         """
         Returns the Jacobian vector product.
+
         Implements the forward pass of a direction (a vector in the tangent space).
 
         .. math::
@@ -95,6 +95,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, None]:
         """
         Returns the Jacobian matrix Jacobian transpose product.
+
         Implements the forward pass of a metric (a matrix in the tangent space).
 
         .. math::
@@ -141,6 +142,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, None]:
         """
         Returns the vector Jacobian product.
+
         Implements the forward pass of a direction (a vector in the tangent space).
 
         .. math::
@@ -185,6 +187,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, List[Tensor], None]:
         """
         Returns the Jacobian transpose matrix Jacobian product.
+        
         Implements the backward pass of a metric (a matrix in the tangent space).
 
         .. math::
