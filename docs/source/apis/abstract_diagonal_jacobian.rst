@@ -1,5 +1,5 @@
 
-AbstractDiagonalJacobian
+Abstract Jacobian (diagonal)
 ===================================
 
 .. currentmodule:: nnj

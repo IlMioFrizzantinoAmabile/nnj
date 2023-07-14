@@ -1,9 +1,8 @@
 NNJ Documentation
 ===================================
 
-nnj extends torch.nn with fast jacobian vector/matrix product (jvp/mvp).
-It is a order of magnitude faster and more memory efficient than alternatives.
-All jacobian computations are implemented in native PyTorch.
+NNJ is torch.nn plus Jacobian operations. It efficiently implements both forward and backward passes of both directions and metrics in tangent spaces.
+It is a fast and more memory efficient extension of PyTorch.
 
 
 Github: https://github.com/IlMioFrizzantinoAmabile/nnj
@@ -72,7 +71,7 @@ Usage
    import nnj
 
    # Define you sequential model
-   network_nn = torch.nn.Sequential(
+   network = torch.nn.Sequential(
       nn.Linear(),
       nn.Tanh(),
       nn.Linear(),

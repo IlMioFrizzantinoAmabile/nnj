@@ -6,9 +6,12 @@ from torch import Tensor
 
 class AbstractJacobian:
     """Abstract class that:
+
     - will overwrite the default behaviour of the forward method such that it
     is also possible to return the jacobian
+
     - propagate jacobian vector and jacobian matrix products, both forward and backward
+    
     - pull back and push forward metrics
     """
 
@@ -19,17 +22,17 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        Compute the Jacobian matrix of the layer evaluated in x
+        Compute the Jacobian matrix of the module when evaluated in x
 
         .. math::
-            ∇_{wrt} \,\, layer(x)
+            ∇_{wrt} \,\, module(x)
 
         .. note::
             This method has to be implemented for every new nnj layer. Then all other jacobian products are usable.
 
         Args:
-            x: The input of the layer.
-            val: The output of the layer.
+            x: The input of the module.
+            val: The output of the module.
             wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
 
         """
@@ -47,22 +50,18 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        Returns the Jacobian vector product
+        Returns the Jacobian vector product.
+        Implements the forward pass of a direction (a vector in the tangent space).
 
         .. math::
-            jvp(x,vector) = ∇_{wrt} \,\, layer(x) * vector
+            jvp(x,vector) = ∇_{wrt} \,\, module(x) * vector
 
         Args:
-            x: The input of the layer.
-            val: The output of the layer.
+            x: The input of the module.
+            val: The output of the module.
             vector: The vector in the tangent space to propagate. It has to be of same shape of x if wrt="weight", and the same shape as parameter if wrt="input".
             wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
 
-        Shape:
-            - x:
-            - val:
-            - vector:
-            - output:
         """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
@@ -95,7 +94,21 @@ class AbstractJacobian:
         diag_backprop: bool = False,
     ) -> Union[Tensor, None]:
         """
-        jacobian matrix jacobian.T product
+        Returns the Jacobian matrix Jacobian transpose product.
+        Implements the forward pass of a metric (a matrix in the tangent space).
+
+        .. math::
+            jvp(x,matrix) = ∇_{wrt} \,\, module(x) * matrix * ∇_{wrt} \,\, module(x)^T
+
+        Args:
+            x: The input of the module.
+            val: The output of the module.
+            matrix: The matrix in the tangent space to propagate. It has to be the squared shape of x if wrt="weight", and the squared shape of parameter if wrt="input".
+            wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
+            from_diag: If True, the matrix is assumed to be diagonal and the diagoal (passed as a vector).
+            to_diag: If True, only the diagonal of the output matrix is returned (passed as a vector).
+            diag_backprop: If True, and approximated and faster propagation is performed.
+
         """
         if diag_backprop:  # TODO
             raise NotImplementedError
@@ -127,7 +140,18 @@ class AbstractJacobian:
         wrt: Literal["input", "weight"] = "input",
     ) -> Union[Tensor, None]:
         """
-        vector jacobian product
+        Returns the vector Jacobian product.
+        Implements the forward pass of a direction (a vector in the tangent space).
+
+        .. math::
+            jvp(x,vector) = vector * ∇_{wrt} \,\, module(x)
+
+        Args:
+            x: The input of the module.
+            val: The output of the module.
+            vector: The vector in the tangent space to propagate. It has to be of same shape of the output.
+            wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
+
         """
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
@@ -160,7 +184,21 @@ class AbstractJacobian:
         diag_backprop: bool = False,
     ) -> Union[Tensor, List[Tensor], None]:
         """
-        jacobian.T matrix jacobian product
+        Returns the Jacobian transpose matrix Jacobian product.
+        Implements the backward pass of a metric (a matrix in the tangent space).
+
+        .. math::
+            jvp(x,matrix) = ∇_{wrt} \,\, module(x)^T * matrix * ∇_{wrt} \,\, module(x)
+
+        Args:
+            x: The input of the module.
+            val: The output of the module.
+            matrix: The matrix in the tangent space to propagate. It has to be the squared shape of the output.
+            wrt: The variable with respect to the derivative is computed: "input" for x, "weight" for parameters.
+            from_diag: If True, the matrix is assumed to be diagonal and the diagoal (passed as a vector).
+            to_diag: If True, only the diagonal of the output matrix is returned (passed as a vector).
+            diag_backprop: If True, and approximated and faster propagation is performed.
+
         """
         if diag_backprop:
             # TODO: better error message

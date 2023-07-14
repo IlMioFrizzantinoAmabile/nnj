@@ -1,5 +1,5 @@
 
-AbstractJacobian
+Abstract Jacobian
 ===================================
 
 .. currentmodule:: nnj
