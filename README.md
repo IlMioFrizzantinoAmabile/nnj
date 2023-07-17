@@ -90,3 +90,4 @@ class nnjCustomLayer(AbstractJacobian, nn.CustomLayer):
             # this is none if the layer is non-parametric (i.e. doesn't have learnable weights)
 ```
 
+![Bender](https://github.com/IlMioFrizzantinoAmabile/nnj/blob/main/docs/source/_static/images/Bender.png)
