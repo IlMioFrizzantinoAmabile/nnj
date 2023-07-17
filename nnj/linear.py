@@ -194,13 +194,13 @@ class Linear(nn.Linear, AbstractJacobian):
         if wrt == "input":
             return torch.einsum("bij,jk->bik", matrix, self.weight)
         elif wrt == "weight":
-            b, l = x.shape
+            b, c1 = x.shape
             r = matrix.shape[1]
             assert x.shape[0] == matrix.shape[0]
             if self.bias is None:
-                return torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1)
+                return torch.einsum("bri,bj->brij", matrix, x).reshape(b, r, -1)
             else:
-                return torch.cat([torch.einsum("bri,bj->brij", matrix, x).view(b, r, -1), matrix], dim=2)
+                return torch.cat([torch.einsum("bri,bj->brij", matrix, x).reshape(b, r, -1), matrix], dim=2)
 
     def jTmjp(
         self,
@@ -239,13 +239,27 @@ class Linear(nn.Linear, AbstractJacobian):
                 matrixT = matrix.transpose(1, 2)
                 mTjp = self.mjp(x, val, matrixT, wrt=wrt)
                 jTmp = mTjp.transpose(1, 2)
-                jTmjp = self.jmp(x, val, jTmp, wrt=wrt)
+                jTmjp = self.mjp(x, val, jTmp, wrt=wrt)
                 return jTmjp
             elif from_diag and not to_diag:
                 # diag -> full
-                # TODO: improve efficiency
-                jacobian = self.jacobian(x, val, wrt=wrt)
-                return torch.einsum("bji,bj,bjq->biq", jacobian, matrix, jacobian)
+                # TODO: improve efficiency (?)
+                bs, c1 = x.shape
+                c2 = matrix.shape[1]
+                x_outer = torch.einsum("bi,bj->bij", x, x)
+                matrix = torch.diag_embed(matrix)
+                if self.bias is None:
+                    return torch.einsum("bij,bkq->bkiqj", x_outer, matrix).view(bs, c1 * c2, c1 * c2)
+                else:
+                    first_block = torch.einsum("bij,bkq->bkiqj", x_outer, matrix).view(bs, c1 * c2, c1 * c2)
+                    outer_diag_block = torch.einsum("bi,bjk->bjik", x, matrix).view(bs, c1 * c2, c2)
+                    return torch.cat(
+                        [
+                            torch.cat([first_block, outer_diag_block], dim=2),
+                            torch.cat([outer_diag_block.transpose(1, 2), matrix], dim=2),
+                        ],
+                        dim=1,
+                    )
             elif not from_diag and to_diag:
                 # full -> diag
                 bs, _, _ = matrix.shape

@@ -27,8 +27,8 @@ to_test_easy = [
     nnj.Sigmoid(),
 ]
 to_test_advanced = [
-    nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13), add_hooks=True),
-    nnj.Sequential(nnj.Linear(3, 5), nnj.ReLU(), nnj.Linear(5, 13), add_hooks=True),
+    nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13)),
+    nnj.Sequential(nnj.Linear(3, 5), nnj.ReLU(), nnj.Linear(5, 13)),
     nnj.Sequential(
         nnj.Linear(3, 5),
         nnj.Tanh(),
@@ -37,7 +37,6 @@ to_test_advanced = [
         nnj.Tanh(),
         nnj.Linear(2, 13),
         nnj.Tanh(),
-        add_hooks=True,
     ),
     nnj.Sequential(
         nnj.Linear(3, 5),
@@ -46,11 +45,9 @@ to_test_advanced = [
             nnj.Linear(5, 5),
             nnj.Tanh(),
             nnj.Linear(5, 2),
-            add_hooks=True,
         ),
         nnj.ReLU(),
         nnj.Linear(2, 13),
-        add_hooks=True,
     ),
 ]
 
@@ -204,9 +201,6 @@ def test_jmjTp_wrt_input():
         for x in xs:
             for from_diag in [False, True]:
                 for to_diag in [False, True]:
-                    if from_diag is False and to_diag is False:
-                        continue
-
                     batch_size = x.shape[0]
                     jacobian = layer.jacobian(x, None, wrt="input")
 
@@ -289,7 +283,6 @@ def test_jmjTp_wrt_weight():
                             )
 
                     assert jmjTp_fast.shape == jmjTp_slow.shape
-                    print(torch.abs(jmjTp_fast - jmjTp_slow).sum())
                     assert torch.isclose(jmjTp_fast, jmjTp_slow, atol=1e-4).all()
 
 
@@ -298,9 +291,6 @@ def test_jTmjp_wrt_input():
         for x in xs:
             for from_diag in [False, True]:
                 for to_diag in [False, True]:
-                    if from_diag is False and to_diag is False:
-                        continue
-
                     output_shape = layer.forward(x).shape
                     batch_size = x.shape[0]
                     jacobian = layer.jacobian(x, None, wrt="input")
@@ -355,6 +345,7 @@ def test_jTmjp_wrt_weight():
                     if to_diag is False:
                         # TODO: test these cases as well
                         continue
+
                     if layer._n_params == 0:
                         return  # TODO: check that .jmjTp returns None in all cases
 
@@ -369,7 +360,11 @@ def test_jTmjp_wrt_weight():
 
                         if to_diag is False:
                             # full -> full
-                            raise NotImplementedError
+                            jTmjp_slow = torch.einsum("bji, bjk, bkq -> biq", jacobian, tangent_matrix_output, jacobian)
+                            jTmjp_fast = layer.jTmjp(
+                                x, None, tangent_matrix_output, wrt="weight", from_diag=False, to_diag=False
+                            )
+                            # print(jTmjp_slow.shape, jTmjp_fast.shape)
                         elif to_diag is True:
                             # full -> diag
                             jTmjp_slow = torch.einsum("bji, bjk, bki -> bi", jacobian, tangent_matrix_output, jacobian)
@@ -382,7 +377,12 @@ def test_jTmjp_wrt_weight():
 
                         if to_diag is False:
                             # diag -> full
-                            raise NotImplementedError
+                            jTmjp_slow = torch.einsum(
+                                "bji, bj, bjk -> bik", jacobian, tangent_diagonal_matrix_output, jacobian
+                            )
+                            jTmjp_fast = layer.jTmjp(
+                                x, None, tangent_diagonal_matrix_output, wrt="weight", from_diag=True, to_diag=False
+                            )
                         elif to_diag is True:
                             # diag -> diag
                             jTmjp_slow = torch.einsum(

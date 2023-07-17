@@ -10,7 +10,7 @@ class Sigmoid(AbstractDiagonalJacobian, nn.Sigmoid):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._n_params = 0
-        
+
     def jacobian(
         self,
         x: Tensor,

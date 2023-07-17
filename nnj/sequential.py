@@ -7,7 +7,7 @@ from nnj.abstract_jacobian import AbstractJacobian
 
 
 class Sequential(AbstractJacobian, nn.Sequential):
-    def __init__(self, *args, add_hooks: bool = False):
+    def __init__(self, *args, add_hooks: bool = True):
         super().__init__(*args)
         self._modules_list = list(self._modules.values())
 

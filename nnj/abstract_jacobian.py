@@ -187,7 +187,7 @@ class AbstractJacobian:
     ) -> Union[Tensor, List[Tensor], None]:
         """
         Returns the Jacobian transpose matrix Jacobian product.
-        
+
         Implements the backward pass of a metric (a matrix in the tangent space).
 
         .. math::
@@ -221,3 +221,15 @@ class AbstractJacobian:
         elif from_diag and to_diag:
             # diag -> diag
             return torch.einsum("bij,bj,bji->bi", jacobian, matrix, jacobian)
+
+    def get_weight(self) -> Tensor:
+        """
+        Returns the weight of the module.
+        """
+        return torch.nn.utils.parameters_to_vector(self.parameters())
+
+    def set_weight(self, weight: Tensor) -> None:
+        """
+        Sets the weight of the module.
+        """
+        torch.nn.utils.vector_to_parameters(weight, self.parameters())
