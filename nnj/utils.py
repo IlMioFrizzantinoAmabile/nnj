@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from nnj import nnj
+import nnj
 
 
 def convert_to_nnj(sequential: nn.Sequential) -> nnj.Sequential:
