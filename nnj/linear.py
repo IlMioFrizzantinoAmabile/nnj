@@ -146,7 +146,8 @@ class Linear(nn.Linear, AbstractJacobian):
                     )
             elif not from_diag and to_diag:
                 # full -> diag
-                raise NotImplementedError
+                # TODO: do it properly
+                return torch.einsum("bii -> bi", self.jmjTp(x, val, matrix, wrt=wrt, from_diag=False, to_diag=False))
             elif from_diag and to_diag:
                 # diag -> diag
                 bs, _ = matrix.shape

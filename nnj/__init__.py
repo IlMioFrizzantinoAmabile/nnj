@@ -17,5 +17,5 @@ from nnj.sigmoid import Sigmoid  # isort:skip
 
 #############################
 ### utils                 ###
-from nnj.utils import convert_to_nnj  # isort:skip
+from nnj.utils import convert_to_nnj, invert_block_diagonal  # isort:skip
 from torch.nn.utils import vector_to_parameters, parameters_to_vector  # isort:skip

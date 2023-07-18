@@ -49,6 +49,26 @@ to_test_advanced = [
         nnj.ReLU(),
         nnj.Linear(2, 13),
     ),
+    nnj.Sequential(
+        nnj.Linear(3, 5),
+        nnj.Tanh(),
+        nnj.Sequential(
+            nnj.Sequential(
+                nnj.Linear(5, 5),
+                nnj.Tanh(),
+                nnj.Linear(5, 3),
+            ),
+            nnj.Tanh(),
+            nnj.Linear(3, 2),
+        ),
+        nnj.ReLU(),
+        nnj.Sequential(
+            nnj.Linear(2, 5),
+            nnj.Tanh(),
+            nnj.Linear(5, 2),
+        ),
+        nnj.Linear(2, 13),
+    ),
 ]
 
 
@@ -245,14 +265,36 @@ def test_jmjTp_wrt_input():
 
 
 def test_jmjTp_wrt_weight():
+    # utility functions for sequential layers
+    def generate_random_matrix_params(batch_size, module):
+        if isinstance(module, nnj.Sequential):
+            diagonal_blocks = [
+                generate_random_matrix_params(batch_size, submodule) for submodule in module._modules.values()
+            ]
+            return [d for d in diagonal_blocks if d is not None]
+        if module._n_params == 0:
+            return None
+        return torch.randn(batch_size, module._n_params, module._n_params)
+
+    def embed_block_diagonal(matrix):
+        if isinstance(matrix, list):
+            embedded_submatrices = [embed_block_diagonal(submatrix) for submatrix in matrix]
+            batch_size = embedded_submatrices[0].shape[0]
+            n_row = sum([submatrix.shape[1] for submatrix in embedded_submatrices])
+            n_col = sum([submatrix.shape[2] for submatrix in embedded_submatrices])
+            embedded_matrix = torch.zeros(batch_size, n_row, n_col)
+            i_row, i_col = 0, 0
+            for submatrix in embedded_submatrices:
+                embedded_matrix[:, i_row : i_row + submatrix.shape[1], i_col : i_col + submatrix.shape[2]] = submatrix
+                i_row += submatrix.shape[1]
+                i_col += submatrix.shape[2]
+            return embedded_matrix
+        return matrix
+
     for layer in to_test_easy + to_test_advanced:
         for x in xs:
             for from_diag in [False, True]:
                 for to_diag in [False, True]:
-                    if from_diag is False:
-                        # TODO: test these cases as well
-                        continue
-
                     if layer._n_params == 0:
                         return  # TODO: check that .jmjTp returns None in all cases
 
@@ -260,7 +302,24 @@ def test_jmjTp_wrt_weight():
                     jacobian = layer.jacobian(x, None, wrt="weight")
 
                     if from_diag is False:
-                        raise NotImplementedError
+                        tangent_matrix_params = generate_random_matrix_params(batch_size, layer)
+
+                        if to_diag is False:
+                            # full -> full
+                            jmjTp_slow = torch.einsum(
+                                "bij, bjk, bqk -> biq", jacobian, embed_block_diagonal(tangent_matrix_params), jacobian
+                            )
+                            jmjTp_fast = layer.jmjTp(
+                                x, None, tangent_matrix_params, wrt="weight", from_diag=False, to_diag=False
+                            )
+                        elif to_diag is True:
+                            # full -> diag
+                            jmjTp_slow = torch.einsum(
+                                "bij, bjk, bik -> bi", jacobian, embed_block_diagonal(tangent_matrix_params), jacobian
+                            )
+                            jmjTp_fast = layer.jmjTp(
+                                x, None, tangent_matrix_params, wrt="weight", from_diag=False, to_diag=True
+                            )
 
                     elif from_diag is True:
                         tangent_diagonal_matrix_params = torch.randn(batch_size, layer._n_params)
@@ -338,13 +397,35 @@ def test_jTmjp_wrt_input():
 
 
 def test_jTmjp_wrt_weight():
+    # utility functions for sequential layers
+    def get_shape_of_block_diagonal(matrix):
+        if isinstance(matrix, list):
+            n_row = sum([get_shape_of_block_diagonal(submatrix)[0] for submatrix in matrix])
+            n_col = sum([get_shape_of_block_diagonal(submatrix)[1] for submatrix in matrix])
+            return n_row, n_col
+        return matrix.shape[1], matrix.shape[2]
+
+    def is_close_block_diagonal(matrix1, matrix2, atol=1e-4):
+        if isinstance(matrix1, list):
+            l = True
+            i_row, i_col = 0, 0
+            for submatrix1 in matrix1:
+                n_row, n_col = get_shape_of_block_diagonal(submatrix1)
+                submatrix2 = matrix2[:, i_row : i_row + n_row, i_col : i_col + n_col]
+                # l.append(is_close_block_diagonal(submatrix1, submatrix2, atol=atol))
+                l = l and is_close_block_diagonal(submatrix1, submatrix2, atol=atol)
+                i_row += n_row
+                i_col += n_col
+            return l
+        return torch.isclose(matrix1, matrix2, atol=atol).all()
+
     for layer in to_test_easy + to_test_advanced:
         for x in xs:
             for from_diag in [False, True]:
                 for to_diag in [False, True]:
-                    if to_diag is False:
-                        # TODO: test these cases as well
-                        continue
+                    # if to_diag is False:
+                    # TODO: test these cases as well
+                    #    continue
 
                     if layer._n_params == 0:
                         return  # TODO: check that .jmjTp returns None in all cases
@@ -364,7 +445,6 @@ def test_jTmjp_wrt_weight():
                             jTmjp_fast = layer.jTmjp(
                                 x, None, tangent_matrix_output, wrt="weight", from_diag=False, to_diag=False
                             )
-                            # print(jTmjp_slow.shape, jTmjp_fast.shape)
                         elif to_diag is True:
                             # full -> diag
                             jTmjp_slow = torch.einsum("bji, bjk, bki -> bi", jacobian, tangent_matrix_output, jacobian)
@@ -392,5 +472,6 @@ def test_jTmjp_wrt_weight():
                                 x, None, tangent_diagonal_matrix_output, wrt="weight", from_diag=True, to_diag=True
                             )
 
-                    assert jTmjp_fast.shape == jTmjp_slow.shape
-                    assert torch.isclose(jTmjp_fast, jTmjp_slow, atol=1e-4).all()
+                    # assert jTmjp_fast.shape == jTmjp_slow.shape
+                    # assert torch.isclose(jTmjp_fast, jTmjp_slow, atol=1e-4).all()
+                    assert is_close_block_diagonal(jTmjp_fast, jTmjp_slow, atol=1e-4).all()

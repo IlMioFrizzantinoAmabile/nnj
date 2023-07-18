@@ -130,7 +130,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
-    ) -> Union[Tensor, Tuple]:
+    ) -> Union[Tensor, List, None]:
         """
         jacobian matrix jacobian.T product
         """
@@ -165,6 +165,8 @@ class Sequential(AbstractJacobian, nn.Sequential):
                 new_matrix = []
                 p = 0
                 for layer in self._modules_list:
+                    if layer._n_params == 0:
+                        continue
                     if from_diag:
                         new_matrix.append(matrix[:, p : p + layer._n_params])
                     else:
@@ -175,6 +177,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
                 matrix = new_matrix
             # forward pass again
             jmjTp = None
+            k_with_params = 0
             for k in range(len(self._modules_list)):
                 # propagate through the input
                 if jmjTp is not None:
@@ -188,15 +191,18 @@ class Sequential(AbstractJacobian, nn.Sequential):
                         diag_backprop=diag_backprop,
                     )
                 # propagate through the weight
+                if self._modules_list[k]._n_params == 0:
+                    continue
                 jmjTp_from_layer = self._modules_list[k].jmjTp(
                     self.feature_maps[k],
                     self.feature_maps[k + 1],
-                    matrix[k],
+                    matrix[k_with_params],
                     wrt="weight",
                     from_diag=from_diag,
                     to_diag=to_diag if k == len(self._modules_list) - 1 else diag_backprop,
                     diag_backprop=diag_backprop,
                 )
+                k_with_params += 1
                 if jmjTp_from_layer is not None:
                     if jmjTp is None:
                         jmjTp = jmjTp_from_layer
@@ -290,7 +296,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
-    ) -> Union[Tensor, Tuple]:
+    ) -> Union[Tensor, List, None]:
         """
         jacobian.T matrix jacobian product
         """
@@ -318,7 +324,8 @@ class Sequential(AbstractJacobian, nn.Sequential):
                     diag_backprop=diag_backprop,
                 )
                 if m_k is not None:
-                    ms = m_k + ms if isinstance(m_k, list) else [m_k] + ms
+                    # ms = m_k + ms if isinstance(m_k, list) else [m_k] + ms
+                    ms = [m_k] + ms
                 if k == 0:
                     break
             # backpropagate through the input

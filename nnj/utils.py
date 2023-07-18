@@ -1,3 +1,6 @@
+from typing import List
+
+import torch
 import torch.nn as nn
 
 import nnj
@@ -34,3 +37,9 @@ def convert_to_nnj(sequential: Sequential) -> Sequential:
     model = nnj.Sequential(*model, add_hooks=True)
 
     return model
+
+
+def invert_block_diagonal(matrix):
+    if isinstance(matrix, list):
+        return [invert_block_diagonal(m) for m in matrix]
+    return torch.cholesky_inverse(matrix)
