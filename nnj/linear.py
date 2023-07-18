@@ -11,6 +11,7 @@ class Linear(nn.Linear, AbstractJacobian):
         super().__init__(*args, **kwargs)
         self._n_params = sum([torch.numel(w) for w in list(self.parameters())])
 
+    @torch.no_grad()
     def jacobian(
         self,
         x: Tensor,
@@ -35,6 +36,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### forward passes ###
     ######################
 
+    @torch.no_grad()
     def jvp(
         self,
         x: Tensor,
@@ -58,6 +60,7 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].view(b, c2, c1), x) + vector[:, c2 * c1 :]
 
+    @torch.no_grad()
     def jmp(
         self,
         x: Tensor,
@@ -86,6 +89,7 @@ class Linear(nn.Linear, AbstractJacobian):
                     + matrix[:, c2 * c1 :, :]
                 )
 
+    @torch.no_grad()
     def jmjTp(
         self,
         x: Tensor,
@@ -160,6 +164,7 @@ class Linear(nn.Linear, AbstractJacobian):
     ### backward passes ###
     #######################
 
+    @torch.no_grad()
     def vjp(
         self,
         x: Tensor,
@@ -179,6 +184,7 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
 
+    @torch.no_grad()
     def mjp(
         self,
         x: Tensor,
@@ -202,6 +208,7 @@ class Linear(nn.Linear, AbstractJacobian):
             else:
                 return torch.cat([torch.einsum("bri,bj->brij", matrix, x).reshape(b, r, -1), matrix], dim=2)
 
+    @torch.no_grad()
     def jTmjp(
         self,
         x: Tensor,

@@ -28,6 +28,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### forward passes ###
     ######################
 
+    @torch.no_grad()
     def jvp(
         self,
         x: Tensor,
@@ -43,6 +44,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bj,bj->bj", diag_jacobian, vector)
 
+    @torch.no_grad()
     def jmp(
         self,
         x: Tensor,
@@ -60,6 +62,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bi,bi...->bi...", diag_jacobian, matrix)
 
+    @torch.no_grad()
     def jmjTp(
         self,
         x: Tensor,
@@ -103,6 +106,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
     ### backward passes ###
     #######################
 
+    @torch.no_grad()
     def vjp(
         self,
         x: Tensor,
@@ -118,6 +122,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bi,bi->bi", vector, diag_jacobian)
 
+    @torch.no_grad()
     def mjp(
         self,
         x: Tensor,
@@ -135,6 +140,7 @@ class AbstractDiagonalJacobian(AbstractJacobian):
             return None
         return torch.einsum("bij,bj->bij", matrix, diag_jacobian)
 
+    @torch.no_grad()
     def jTmjp(
         self,
         x: Tensor,

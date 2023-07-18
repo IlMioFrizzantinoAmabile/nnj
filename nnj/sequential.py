@@ -35,6 +35,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             x = val
         return x
 
+    @torch.no_grad()
     def jacobian(self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input") -> Tensor:
         """Returns the Jacobian matrix"""
         return self.mjp(x, val, None, wrt=wrt)
@@ -43,6 +44,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### forward passes ###
     ######################
 
+    @torch.no_grad()
     def jvp(
         self,
         x: Tensor,
@@ -79,6 +81,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jvp
 
+    @torch.no_grad()
     def jmp(
         self,
         x: Tensor,
@@ -117,6 +120,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             assert p == self._n_params
             return jmp
 
+    @torch.no_grad()
     def jmjTp(
         self,
         x: Tensor,
@@ -204,6 +208,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
     ### backward passes ###
     #######################
 
+    @torch.no_grad()
     def vjp(
         self,
         x: Tensor,
@@ -238,6 +243,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         elif wrt == "input":
             return vector
 
+    @torch.no_grad()
     def mjp(
         self,
         x: Tensor,
@@ -274,6 +280,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         elif wrt == "input":
             return matrix
 
+    @torch.no_grad()
     def jTmjp(
         self,
         x: Tensor,

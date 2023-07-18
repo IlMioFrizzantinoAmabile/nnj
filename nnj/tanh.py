@@ -11,6 +11,7 @@ class Tanh(AbstractDiagonalJacobian, nn.Tanh):
         super().__init__(*args, **kwargs)
         self._n_params = 0
 
+    @torch.no_grad()
     def jacobian(
         self,
         x: Tensor,

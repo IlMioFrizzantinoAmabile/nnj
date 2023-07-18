@@ -11,6 +11,7 @@ class ReLU(AbstractDiagonalJacobian, nn.ReLU):
         super().__init__(*args, **kwargs)
         self._n_params = 0
 
+    @torch.no_grad()
     def jacobian(
         self, x: Tensor, val: Union[Tensor, None] = None, wrt: Literal["input", "weight"] = "input", diag: bool = False
     ) -> Union[Tensor, None]:

@@ -365,52 +365,62 @@ This library is a fast and memory efficient extension of PyTorch.</p>
 </section>
 <section id="want-to-learn-more-about-nnj">
 <h1>Want to learn more about nnj?<a class="headerlink" href="#want-to-learn-more-about-nnj" title="Permalink to this heading">¶</a></h1>
-<p>Check out our educational content, e.g. start reading our <a class="reference internal" href="nnj/index.html#introduction"><span class="std std-ref">Introduction to nnj</span></a>  to learn more about the nnj.
+<p>Check out our <a class="reference internal" href="nnj/index.html#introduction"><span class="std std-ref">Introduction to nnj</span></a>  to learn more about the theory behind nnj.
 The document seek to provide a simple introduction to nnj and to the functions it provides.</p>
-<p><a class="reference internal" href="nnj/sequential.html#sequential"><span class="std std-ref">Introduction to sequential</span></a></p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
-<section id="wandering-why-not-just-use-jax">
-<h1>Wandering why not just use Jax?<a class="headerlink" href="#wandering-why-not-just-use-jax" title="Permalink to this heading">¶</a></h1>
-<p>Check out our comparison, e.g. start reading our <a class="reference internal" href="why/index.html#why"><span class="std std-ref">Ok, but why</span></a>  to learn more about it.</p>
-<div class="toctree-wrapper compound">
-</div>
-</section>
-<section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">nnj</span>
+<section id="usage-example">
+<h1>Usage example<a class="headerlink" href="#usage-example" title="Permalink to this heading">¶</a></h1>
+<p>Declare your neural network as you would normally do with PyTorch, just with an extra j.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">nnj</span>
 
 <span class="c1"># Define you sequential model</span>
-<span class="n">network</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-   <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
-   <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
-   <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">nnj</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+   <span class="n">nnj</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
+   <span class="n">nnj</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+   <span class="n">nnj</span><span class="o">.</span><span class="n">Linear</span><span class="p">(),</span>
 <span class="p">)</span>
 
-<span class="c1"># convert to nnj</span>
-<span class="n">network_nnj</span> <span class="o">=</span> <span class="n">nnj</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">convert_to_nnj</span><span class="p">(</span>
-   <span class="n">network_nn</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># calling jTmjp on a sequential will iterate through the network and compute jacobian-tranposed matrix jacobian product (e.g. Generalized-Gauss Newton approximation of the hessian) of the nnj network.</span>
-<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-   <span class="n">val</span> <span class="o">=</span> <span class="n">nnj_module</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-   <span class="c1"># backpropagate through the network</span>
-   <span class="n">Jt_J</span> <span class="o">=</span> <span class="n">nnj_module</span><span class="o">.</span><span class="n">jTmjp</span><span class="p">(</span>
-      <span class="n">x</span><span class="p">,</span>
-      <span class="n">val</span><span class="p">,</span>
-      <span class="kc">None</span><span class="p">,</span>
-      <span class="n">wrt</span><span class="o">=</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span>      <span class="c1"># computes the jacobian wrt weights or inputs</span>
-      <span class="n">to_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># computes the diagonal elements only</span>
-      <span class="n">diag_backprop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># approximates the diagonal elements, which speeds up the computations</span>
-   <span class="p">)</span>
-   <span class="c1"># average along batch size</span>
-   <span class="n">Jt_J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Jt_J</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-   <span class="k">return</span> <span class="n">Jt_J</span>
+<span class="c1"># Standard forward pass</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
+</div>
+<p>Compute gradient (with respect to weight) of the l2 loss as backward pass of the residual vector, and perform a gradient step.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The residual is the derivative of the loss with respect to the nn output</span>
+<span class="n">residual</span> <span class="o">=</span> <span class="n">val</span> <span class="o">-</span> <span class="n">target</span>
+<span class="c1"># Backpropagate the residual vector</span>
+<span class="n">gradient</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">vjp</span><span class="p">(</span>
+   <span class="n">x</span><span class="p">,</span>             <span class="c1"># input</span>
+   <span class="n">val</span><span class="p">,</span>           <span class="c1"># output</span>
+   <span class="n">residual</span><span class="p">,</span>      <span class="c1"># residual vector</span>
+   <span class="n">wrt</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span>
+<span class="p">)</span>
+<span class="c1"># Average over batch size</span>
+<span class="n">gradient</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">gradient</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Do a gradient step</span>
+<span class="n">param</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_weight</span><span class="p">()</span>
+<span class="n">param</span> <span class="o">-=</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">gradient</span>
+<span class="n">model</span><span class="o">.</span><span class="n">set_weight</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the Generalized-Gauss Newton (which is an approximation of the hessian) as a backward pass of the Euclidean metric.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jacobianTranspose_jacobian</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_jTmjp</span><span class="p">(</span>
+   <span class="n">x</span><span class="p">,</span>                  <span class="c1"># input</span>
+   <span class="n">val</span><span class="p">,</span>                <span class="c1"># output</span>
+   <span class="kc">None</span><span class="p">,</span>               <span class="c1"># None means identity (i.e. Euclidean metric)</span>
+   <span class="n">wrt</span><span class="o">=</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span>      <span class="c1"># computes the jacobian wrt weights or inputs</span>
+   <span class="n">to_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># computes the diagonal elements only</span>
+   <span class="n">diag_backprop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># approximates the diagonal elements, which speeds up the computations</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="why-not-just-use-jax">
+<h1>Why not just use Jax?<a class="headerlink" href="#why-not-just-use-jax" title="Permalink to this heading">¶</a></h1>
+<p>Check out our comparison, e.g. start reading our <a class="reference internal" href="why/index.html#why"><span class="std std-ref">Ok, but why</span></a>  to learn more about it. (WORK IN PROGRESS)</p>
+<div class="toctree-wrapper compound">
 </div>
 <section id="links">
 <h2>Links:<a class="headerlink" href="#links" title="Permalink to this heading">¶</a></h2>
@@ -473,8 +483,8 @@ The document seek to provide a simple introduction to nnj and to the functions i
 <li><a class="reference internal" href="#">NNJ Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#want-to-learn-more-about-nnj">Want to learn more about nnj?</a></li>
-<li><a class="reference internal" href="#wandering-why-not-just-use-jax">Wandering why not just use Jax?</a></li>
-<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#usage-example">Usage example</a></li>
+<li><a class="reference internal" href="#why-not-just-use-jax">Why not just use Jax?</a><ul>
 <li><a class="reference internal" href="#links">Links:</a></li>
 </ul>
 </li>

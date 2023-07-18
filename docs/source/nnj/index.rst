@@ -65,13 +65,15 @@ Following the common usage of neural networks, we use the keyword *input* for da
 Efficient implementation
 ==========================
 The building block for neural networks, as in PyTorch, is the **Module**: a black-box function with two inputs, a data and a parameter. Such black-box can either be defined *explicitly* or *implicitly*.
+
 Explicitly defined modules further split into:
  * parametric layer (as linear or convolutions)
  * non-parametric layer (as tanh or relu)
 
 Implicitly defined modules can be:
- * composition of other modules (as :ref:` sequential<_sequential>`)   :ref:`Introduction to sequential<sequential>`
+ * composition of other modules ( :ref:`Introduction to sequential<sequential>` )
  * arbitrary function of other modules (as skip-connection or res-block or attention)
+ 
 Efficient implementation of Jacobian products are based on different levels of abstraction. 
 Explicitly defined modules allow access to the explicit form of the Jacobian product and this allows to implement them without ever instatiating the full Jacobian matrix (which is memory consuming and practically often means storing a bunch of useless zeros).
 Implicitly defined modules, instead, rely on the chain rule and on the efficient implementation of the Jacobian product of the building blocks.

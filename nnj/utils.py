@@ -1,9 +1,10 @@
 import torch.nn as nn
 
 import nnj
+from nnj.sequential import Sequential
 
 
-def convert_to_nnj(sequential: nn.Sequential) -> nnj.Sequential:
+def convert_to_nnj(sequential: Sequential) -> Sequential:
     model = []
     for layer in sequential:
         if layer.__class__.__name__ == "Linear":

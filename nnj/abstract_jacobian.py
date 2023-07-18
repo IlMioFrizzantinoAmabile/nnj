@@ -41,6 +41,7 @@ class AbstractJacobian:
     ### forward passes ###
     ######################
 
+    @torch.no_grad()
     def jvp(
         self,
         x: Tensor,
@@ -68,6 +69,7 @@ class AbstractJacobian:
             return None
         return torch.einsum("bij,bj->bi", jacobian, vector)
 
+    @torch.no_grad()
     def jmp(
         self,
         x: Tensor,
@@ -83,6 +85,7 @@ class AbstractJacobian:
             return None
         return torch.einsum("bij,bjk->bik", jacobian, matrix)
 
+    @torch.no_grad()
     def jmjTp(
         self,
         x: Tensor,
@@ -133,6 +136,7 @@ class AbstractJacobian:
     ### backward passes ###
     #######################
 
+    @torch.no_grad()
     def vjp(
         self,
         x: Tensor,
@@ -160,6 +164,7 @@ class AbstractJacobian:
             return None
         return torch.einsum("bi,bij->bj", vector, jacobian)
 
+    @torch.no_grad()
     def mjp(
         self,
         x: Tensor,
@@ -175,6 +180,7 @@ class AbstractJacobian:
             return None
         return torch.einsum("bij,bjk->bik", matrix, jacobian)
 
+    @torch.no_grad()
     def jTmjp(
         self,
         x: Tensor,
@@ -222,12 +228,14 @@ class AbstractJacobian:
             # diag -> diag
             return torch.einsum("bij,bj,bji->bi", jacobian, matrix, jacobian)
 
+    @torch.no_grad()
     def get_weight(self) -> Tensor:
         """
         Returns the weight of the module.
         """
         return torch.nn.utils.parameters_to_vector(self.parameters())
 
+    @torch.no_grad()
     def set_weight(self, weight: Tensor) -> None:
         """
         Sets the weight of the module.
