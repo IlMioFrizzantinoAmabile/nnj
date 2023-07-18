@@ -25,6 +25,7 @@ to_test_easy = [
     nnj.Tanh(),
     nnj.ReLU(),
     nnj.Sigmoid(),
+    nnj.Sinusoidal(),
 ]
 to_test_advanced = [
     nnj.Sequential(nnj.Linear(3, 5), nnj.Tanh(), nnj.Linear(5, 13)),
@@ -407,16 +408,15 @@ def test_jTmjp_wrt_weight():
 
     def is_close_block_diagonal(matrix1, matrix2, atol=1e-4):
         if isinstance(matrix1, list):
-            l = True
+            is_close = True
             i_row, i_col = 0, 0
             for submatrix1 in matrix1:
                 n_row, n_col = get_shape_of_block_diagonal(submatrix1)
                 submatrix2 = matrix2[:, i_row : i_row + n_row, i_col : i_col + n_col]
-                # l.append(is_close_block_diagonal(submatrix1, submatrix2, atol=atol))
-                l = l and is_close_block_diagonal(submatrix1, submatrix2, atol=atol)
+                is_close = is_close and is_close_block_diagonal(submatrix1, submatrix2, atol=atol)
                 i_row += n_row
                 i_col += n_col
-            return l
+            return is_close
         return torch.isclose(matrix1, matrix2, atol=atol).all()
 
     for layer in to_test_easy + to_test_advanced:

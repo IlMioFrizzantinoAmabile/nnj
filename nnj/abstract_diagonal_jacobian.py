@@ -85,8 +85,6 @@ class AbstractDiagonalJacobian(AbstractJacobian):
         diag_jacobian = self.jacobian(x, val, wrt=wrt, diag=True)
         if diag_jacobian is None:  # non parametric layer
             return None
-        if diag_backprop:
-            raise NotImplementedError
         if not from_diag and not to_diag:
             # full -> full
             return torch.einsum("bi,bik,bk->bik", diag_jacobian, matrix, diag_jacobian)
