@@ -15,6 +15,7 @@ from nnj.tanh import Tanh  # isort:skip
 from nnj.relu import ReLU  # isort:skip
 from nnj.sigmoid import Sigmoid  # isort:skip
 from nnj.sinusoidal import Sinusoidal  # isort:skip
+from nnj.softplus import Softplus  # isort:skip
 
 #############################
 ### utils                 ###
