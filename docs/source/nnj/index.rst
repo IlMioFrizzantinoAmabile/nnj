@@ -49,7 +49,7 @@ Moreover, composition of modules is a module itself (sequential) and even arbitr
 
 Jacobian in a neural network
 ==============================
-A neural network is actually a function with two inputs, a data and a parameter. Formally 
+A neural network is actually a function with two inputs: data and parameters. Formally 
 
 .. math::
     f: \mathcal{X}\times\Theta\rightarrow\mathcal{Y}
@@ -64,7 +64,7 @@ Following the common usage of neural networks, we use the keyword *input* for da
 
 Efficient implementation
 ==========================
-The building block for neural networks, as in PyTorch, is the **Module**: a black-box function with two inputs, a data and a parameter. Such black-box can either be defined *explicitly* or *implicitly*.
+The building block for neural networks, as in PyTorch, is the **Module**: a black-box function with two inputs: data and parameters. Such black-box can either be defined *explicitly* or *implicitly*.
 
 Explicitly defined modules further split into:
  * parametric layer (as linear or convolutions)
@@ -75,7 +75,7 @@ Implicitly defined modules can be:
  * arbitrary function of other modules (as skip-connection or res-block or attention)
  
 Efficient implementation of Jacobian products are based on different levels of abstraction. 
-Explicitly defined modules allow access to the explicit form of the Jacobian product and this allows to implement them without ever instatiating the full Jacobian matrix (which is memory consuming and practically often means storing a bunch of useless zeros).
+Explicitly defined modules allow access to the explicit form of the Jacobian product and this allows to implement them **without ever instantiating the full Jacobian matrix** (which is memory consuming and practically often means storing a bunch of useless zeros).
 Implicitly defined modules, instead, rely on the chain rule and on the efficient implementation of the Jacobian product of the building blocks.
 
 
@@ -91,10 +91,10 @@ Defining a nnj neural network can be done either directly as
    import nnj
 
    # Define you sequential model in nnj
-   network = nnj.Sequential(
-      nn.Linear(),
-      nn.Tanh(),
-      nn.Linear(),
+   model = nnj.Sequential(
+      nnj.Linear(),
+      nnj.Tanh(),
+      nnh.Linear(),
    )
 
 or through standard torch.nn and convertion
@@ -105,13 +105,37 @@ or through standard torch.nn and convertion
    import nnj
 
    # Define you sequential model in torch.nn
-   network = torch.nn.Sequential(
+   model = torch.nn.Sequential(
       nn.Linear(),
       nn.Tanh(),
       nn.Linear(),
    )
 
    # convert to nnj
-   network_nnj = nnj.utils.convert_to_nnj(
-      network_nn,
+   model = nnj.utils.convert_to_nnj(
+      model,
    )
+
+And computing jacobian products is as simple as
+
+.. code-block:: python
+
+    val = model(x)
+
+    # Compute gradient (of the l2 loss) as backward pass of the residual
+    residual = val - target
+    gradient = model.vjp(x, val, residual, wrt="weight")
+
+    # Compute the Generalized-Gauss Newton (an approximation of the hessian) as a backward pass of the Euclidean metric
+    jacobianTranspose_jacobian = model._jTmjp(
+        x, 
+        val,
+        None,               # None means identity (i.e. Euclidean metric)
+        wrt="weights",      # computes the jacobian wrt weights or inputs
+        to_diag=True,       # computes the diagonal elements only
+        diag_backprop=True, # approximates the diagonal elements, which speeds up the computations
+    )
+
+    # Average along batch size
+    gradient = torch.mean(gradient, dim=0)
+    jacobianTranspose_jacobian = torch.mean(jacobianTranspose_jacobian, dim=0)
