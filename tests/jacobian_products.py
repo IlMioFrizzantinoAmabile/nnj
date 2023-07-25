@@ -26,6 +26,7 @@ to_test_easy = [
     nnj.ReLU(),
     nnj.Sigmoid(),
     nnj.Sinusoidal(),
+    nnj.TruncExp(),
     nnj.Softplus(),
 ]
 to_test_advanced = [
@@ -47,6 +48,7 @@ to_test_advanced = [
         nnj.Sequential(
             nnj.Linear(5, 5),
             nnj.Tanh(),
+            nnj.TruncExp(),
             nnj.Linear(5, 2),
         ),
         nnj.ReLU(),
@@ -69,6 +71,7 @@ to_test_advanced = [
             nnj.Linear(2, 5),
             nnj.Tanh(),
             nnj.Linear(5, 2),
+            nnj.TruncExp(),
             nnj.Softplus(),
         ),
         nnj.Linear(2, 13),

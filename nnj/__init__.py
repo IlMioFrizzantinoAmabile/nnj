@@ -16,6 +16,7 @@ from nnj.relu import ReLU  # isort:skip
 from nnj.sigmoid import Sigmoid  # isort:skip
 from nnj.sinusoidal import Sinusoidal  # isort:skip
 from nnj.softplus import Softplus  # isort:skip
+from nnj.truncexp import TruncExp  # isort:skip
 
 #############################
 ### utils                 ###
