@@ -41,7 +41,7 @@ residual = val - target
 gradient = model.vjp(x, val, residual, wrt="weight")
 
 # Compute the Generalized-Gauss Newton (an approximation of the hessian) as a backward pass of the Euclidean metric
-jacobianTranspose_jacobian = model._jTmjp(
+jacobianTranspose_jacobian = model.jTmjp(
     x, 
     val,
     None,               # None means identity (i.e. Euclidean metric)
