@@ -91,3 +91,16 @@ class nnjCustomLayer(AbstractJacobian, nn.CustomLayer):
 ```
 
 ![Bender](https://github.com/IlMioFrizzantinoAmabile/nnj/blob/main/docs/source/_static/images/Bender.png)
+
+
+## BibTeX
+If you want to cite the framework:
+
+```bibtex
+@article{software:nnj,
+  title={Nnj},
+  author={Marco Miani and Frederik Warburg},
+  journal={GitHub. Note: [https://github.com/IlMioFrizzantinoAmabile](https://github.com/IlMioFrizzantinoAmabile)},
+  year={2023}
+}
+```
