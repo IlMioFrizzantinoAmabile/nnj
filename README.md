@@ -100,7 +100,7 @@ If you want to cite the framework:
 @article{software:nnj,
   title={Nnj},
   author={Marco Miani and Frederik Warburg},
-  journal={GitHub. Note: [https://github.com/IlMioFrizzantinoAmabile](https://github.com/IlMioFrizzantinoAmabile)},
+  journal={GitHub. Note: https://github.com/IlMioFrizzantinoAmabile},
   year={2023}
 }
 ```
