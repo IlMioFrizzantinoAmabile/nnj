@@ -18,6 +18,8 @@ from nnj.sinusoidal import Sinusoidal  # isort:skip
 from nnj.softplus import Softplus  # isort:skip
 from nnj.truncexp import TruncExp  # isort:skip
 
+from nnj.reshape import Reshape  # isort:skip
+
 #############################
 ### utils                 ###
 from nnj.utils import convert_to_nnj, invert_block_diagonal  # isort:skip

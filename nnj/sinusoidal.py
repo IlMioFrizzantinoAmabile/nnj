@@ -11,7 +11,7 @@ class Sinusoidal(AbstractDiagonalJacobian, nn.Module):
         super().__init__(*args, **kwargs)
         self._n_params = 0
 
-    @torch.no_grad()
+    #@torch.no_grad()
     def forward(self, x):
         return torch.sin(x)
 
