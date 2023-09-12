@@ -12,7 +12,7 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
         self.dims = args
         self._n_params = 0
 
-    #@torch.no_grad()
+    # @torch.no_grad()
     def forward(self, x: Tensor) -> Tensor:
         val = x.reshape(x.shape[0], *self.dims)
         return val
@@ -36,7 +36,6 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
             # non parametric layer has no jacobian with respect to weight
             return None
 
-
     ######################
     ### forward passes ###
     ######################
@@ -54,9 +53,9 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
         """
         if wrt == "input":
             return vector
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
-        
+
     @torch.no_grad()
     def jmp(
         self,
@@ -72,7 +71,7 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
             if matrix is None:
                 raise NotImplementedError
             return matrix
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
 
     @torch.no_grad()
@@ -106,10 +105,9 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
             elif from_diag and to_diag:
                 # diag -> diag
                 return matrix
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
-        
-        
+
     #######################
     ### backward passes ###
     #######################
@@ -127,7 +125,7 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
         """
         if wrt == "input":
             return vector
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
 
     @torch.no_grad()
@@ -145,7 +143,7 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
             if matrix is None:
                 raise NotImplementedError
             return matrix
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
 
     @torch.no_grad()
@@ -181,5 +179,5 @@ class Reshape(AbstractDiagonalJacobian, nn.Module):
             elif from_diag and to_diag:
                 # diag -> diag
                 return matrix
-        elif wrt == "weight": # non parametric layer
+        elif wrt == "weight":  # non parametric layer
             return None
