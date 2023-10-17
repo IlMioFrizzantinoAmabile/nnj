@@ -19,7 +19,7 @@ class ReLU(AbstractDiagonalJacobian, nn.ReLU):
         if wrt == "input":
             if val is None:
                 val = self.forward(x)
-            diag_jacobian = (val > 0.0).type(val.dtype)
+            diag_jacobian = (val > 0.0).type(val.dtype).reshape(val.shape[0], -1)
             if diag:
                 return diag_jacobian
             else:

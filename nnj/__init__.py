@@ -11,6 +11,8 @@ from nnj.sequential import Sequential  # isort:skip
 
 #############################
 ### non-parametric layers ###
+
+# shape preserving, diagonal jacobian
 from nnj.tanh import Tanh  # isort:skip
 from nnj.relu import ReLU  # isort:skip
 from nnj.sigmoid import Sigmoid  # isort:skip
@@ -19,6 +21,12 @@ from nnj.softplus import Softplus  # isort:skip
 from nnj.truncexp import TruncExp  # isort:skip
 
 from nnj.reshape import Reshape  # isort:skip
+from nnj.flatten import Flatten  # isort:skip
+
+# shape preserving, non-diagonal jacobian
+
+# non shape preserving
+from nnj.upsample import Upsample  # isort:skip    # missing forward passes
 
 #############################
 ### utils                 ###

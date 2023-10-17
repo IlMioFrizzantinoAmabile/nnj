@@ -99,7 +99,7 @@ class Linear(nn.Linear, AbstractJacobian):
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
-    ) -> Union[Tensor, Tuple]:
+    ) -> Tensor:
         """
         jacobian matrix jacobian.T product
         """
