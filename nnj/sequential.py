@@ -221,7 +221,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         val: Union[Tensor, None],
         vector: Tensor,
         wrt: Literal["input", "weight"] = "input",
-    ) -> Tensor:
+    ) -> Union[Tensor, None]:
         """
         vector jacobian product
         """
@@ -245,7 +245,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             # backpropagate through the input
             vector = self._modules_list[k].vjp(self.feature_maps[k], self.feature_maps[k + 1], vector, wrt="input")
         if wrt == "weight":
-            return torch.cat(vs, dim=1)
+            return torch.cat(vs, dim=1) if len(vs) > 0 else None
         elif wrt == "input":
             return vector
 
@@ -256,7 +256,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         val: Union[Tensor, None],
         matrix: Union[Tensor, None],
         wrt: Literal["input", "weight"] = "input",
-    ) -> Tensor:
+    ) -> Union[Tensor, None]:
         """
         matrix jacobian product
         """
@@ -282,7 +282,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
             # backpropagate through the input
             matrix = self._modules_list[k].mjp(self.feature_maps[k], self.feature_maps[k + 1], matrix, wrt="input")
         if wrt == "weight":
-            return torch.cat(ms, dim=2)
+            return torch.cat(ms, dim=2) if len(ms) > 0 else None
         elif wrt == "input":
             return matrix
 
