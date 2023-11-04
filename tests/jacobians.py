@@ -15,7 +15,7 @@ import nnj
 batch_size = 7
 shape_1D = (3,)
 shape_2D = (3, 4)
-shape_3D = (2, 3, 4)
+shape_3D = (5, 6, 4)
 
 # define input data
 xs_nD = []
@@ -89,18 +89,24 @@ layers_on_x2D = [
 layers_on_x3D = [
     nnj.Upsample(scale_factor=2),
     nnj.Upsample(scale_factor=3),
-    nnj.Reshape(6, 2, 2),
+    nnj.MaxPool2d(kernel_size=2, stride=2),
+    nnj.Reshape(6, 10, 2),
     nnj.Sequential(
         nnj.Flatten(),
-        nnj.Linear(24, 6),
+        nnj.Linear(120, 6),
         nnj.Tanh(),
         nnj.Reshape(1, 2, 3),
         add_hooks=True,
     ),
+    nnj.Sequential(
+        nnj.MaxPool2d(2),
+        nnj.Flatten(),
+        nnj.Linear(30, 12),
+        nnj.Reshape(3, 2, 2),
+        nnj.Upsample(scale_factor=3),
+        add_hooks=True,
+    ),
 ]
-
-to_test_advanced = []
-to_test_easy = []
 
 
 def test_jacobian_wrt_input():

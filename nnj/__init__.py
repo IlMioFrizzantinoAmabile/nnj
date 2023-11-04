@@ -26,7 +26,8 @@ from nnj.flatten import Flatten  # isort:skip
 # shape preserving, non-diagonal jacobian
 
 # non shape preserving
-from nnj.upsample import Upsample  # isort:skip    # missing forward passes
+from nnj.upsample import Upsample  # isort:skip     # missing forward passes
+from nnj.maxpool2d import MaxPool2d  # isort:skip   # missing forward passes
 
 #############################
 ### utils                 ###
