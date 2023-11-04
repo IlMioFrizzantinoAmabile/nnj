@@ -29,7 +29,6 @@ class Upsample(nn.Upsample, AbstractJacobian):
             identity = torch.ones(b, c2 * h2 * w2, device=x.device)
             identity = torch.diag_embed(identity)
             j = self.mjp(x, val, identity, wrt="input")
-            print(j)
             return j
         elif wrt == "weight":
             # non parametric layer has no jacobian with respect to weight
@@ -137,16 +136,16 @@ class Upsample(nn.Upsample, AbstractJacobian):
             weight = torch.ones(1, 1, int(self.scale_factor), int(self.scale_factor), device=x.device)
 
             vector_J = F.conv2d(
-                vector.reshape(b * c2, h2, w2),
+                vector.reshape(b * c2, 1, h2, w2),
                 weight=weight,
                 bias=None,
                 stride=int(self.scale_factor),
                 padding=0,
                 dilation=1,
                 groups=1,
-            ).reshape(b * c2, h1 * w1)
+            ).reshape(b, c1 * h1 * w1)
 
-            return vector_J.reshape(b, c1 * h1 * w1)
+            return vector_J
         elif wrt == "weight":
             # non parametric layer has no jacobian with respect to weight
             return None
@@ -170,24 +169,22 @@ class Upsample(nn.Upsample, AbstractJacobian):
             b, c1, h1, w1 = x.shape
             _, c2, h2, w2 = val.shape
             assert c1 == c2
-            assert matrix.shape == (b, c2 * h2 * w2, c2 * h2 * w2)
+            assert matrix.shape[0] == b and matrix.shape[2] == c2 * h2 * w2
+            n_rows = matrix.shape[1]
 
             weight = torch.ones(1, 1, int(self.scale_factor), int(self.scale_factor), device=x.device)
 
-            matrix = matrix.reshape(b, c2, h2 * w2, c2, h2 * w2)
-            matrix = matrix.movedim(2, 3)
             matrix_J = F.conv2d(
-                matrix.reshape(b * c2 * c2 * h2 * w2, 1, h2, w2),
+                matrix.reshape(b * n_rows * c2, 1, h2, w2),
                 weight=weight,
                 bias=None,
                 stride=int(self.scale_factor),
                 padding=0,
                 dilation=1,
                 groups=1,
-            ).reshape(b * c2, c2, h2 * w2, h1 * w1)
+            ).reshape(b, n_rows, c2 * h1 * w1)
 
-            matrix_J = matrix_J.movedim(1, 2)
-            return matrix_J.reshape(b, c2 * h2 * w2, c1 * h1 * w1)
+            return matrix_J
         elif wrt == "weight":
             # non parametric layer has no jacobian with respect to weight
             return None
@@ -263,19 +260,19 @@ class Upsample(nn.Upsample, AbstractJacobian):
                 raise NotImplementedError
             elif from_diag and to_diag:
                 # diag -> diag
-                weight = torch.ones(c2, c1, int(self.scale_factor), int(self.scale_factor), device=x.device)
+                weight = torch.ones(1, 1, int(self.scale_factor), int(self.scale_factor), device=x.device)
 
                 matrix = F.conv2d(
-                    matrix.reshape(b, c2, h2, w2),
+                    matrix.reshape(b * c2, 1, h2, w2),
                     weight=weight,
                     bias=None,
                     stride=int(self.scale_factor),
                     padding=0,
                     dilation=1,
                     groups=1,
-                )
+                ).reshape(b, c1 * h1 * w1)
 
-                return matrix.reshape(b, c1 * h1 * w1)
+                return matrix
         elif wrt == "weight":
             # non parametric layer has no jacobian with respect to weight
             return None
