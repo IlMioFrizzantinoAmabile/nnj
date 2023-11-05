@@ -22,7 +22,7 @@ dependencies = [
     "sphinx",
     "sphinx_rtd_theme",
     "sphinxcontrib-video",
-    "torch>=1.13.1",
+    "torch",
 ]
 
 [tool.setuptools.packages.find]
