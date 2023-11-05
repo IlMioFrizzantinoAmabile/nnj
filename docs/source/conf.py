@@ -1,6 +1,5 @@
 import pytorch_sphinx_theme
 
-
 __version__ = "0.0.0"
 
 # -- Project information
