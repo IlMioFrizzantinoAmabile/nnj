@@ -1,4 +1,4 @@
-Sigmoid
+Upsample
 ===================================
 
 .. currentmodule:: nnj

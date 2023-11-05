@@ -1,4 +1,4 @@
-Sigmoid
+MaxPool2d
 ===================================
 
 .. currentmodule:: nnj
