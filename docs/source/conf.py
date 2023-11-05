@@ -1,6 +1,5 @@
 import pytorch_sphinx_theme
 
-import nnj
 
 __version__ = "0.0.0"
 
