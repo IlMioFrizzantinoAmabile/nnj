@@ -10,10 +10,9 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
-          pip install -e .
-      - name: Install dependencies
-        run: |
-          pip install sphinx==5.2.1 sphinx-copybutton==0.5.0 sphinx-design==0.2.0 sphinx_rtd_theme git+https://github.com/liruilong940607/pytorch_sphinx_theme.git#egg=pytorch_sphinx_theme          
+          pip install -r docs/requirements.txt
+          pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
+          BUILD_NO_CUDA=1 pip install -e .
       - name: Sphinx build
         run: |
           sphinx-build docs/source docs/build
