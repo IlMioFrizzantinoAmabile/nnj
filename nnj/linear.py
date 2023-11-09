@@ -142,7 +142,8 @@ class Linear(nn.Linear, AbstractJacobian):
                     return torch.diag_embed(torch.einsum("bi,bji->bj", x_sq, matrix.reshape(bs, c2, c1)))
                 else:
                     return torch.diag_embed(
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1)) + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1))
+                        + matrix[:, c2 * c1 :]
                     )
             elif not from_diag and to_diag:
                 # full -> diag
@@ -158,7 +159,8 @@ class Linear(nn.Linear, AbstractJacobian):
                     return torch.einsum("bi,bji->bj", x_sq, matrix.reshape(bs, c2, c1))
                 else:
                     return (
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1)) + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1))
+                        + matrix[:, c2 * c1 :]
                     )
 
     #######################

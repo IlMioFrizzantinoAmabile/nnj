@@ -16,7 +16,7 @@ class L2Norm(AbstractJacobian, nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         norm = torch.norm(x.reshape(x.shape[0], -1), p=2, dim=1)
-        normalized_x = torch.einsum("b,b...->b...", 1. / (norm + self.eps), x)
+        normalized_x = torch.einsum("b,b...->b...", 1.0 / (norm + self.eps), x)
         return normalized_x
 
     @torch.no_grad()
@@ -29,17 +29,17 @@ class L2Norm(AbstractJacobian, nn.Module):
     ) -> Union[Tensor, None]:
         """Returns the Jacobian matrix"""
         if wrt == "input":
-            if diag==True:
+            if diag == True:
                 raise NotImplementedError
             if val is None:
                 val = self.forward(x)
             x = x.reshape(x.shape[0], -1)
             b, d = x.shape
             norm = torch.norm(x, p=2, dim=1)
-            normalized_x = torch.einsum("b,bi->bi", 1. / (norm + self.eps), x)
+            normalized_x = torch.einsum("b,bi->bi", 1.0 / (norm + self.eps), x)
             jacobian = torch.einsum("bi,bj->bij", normalized_x, normalized_x)
             jacobian = torch.diag(torch.ones(d, device=x.device)).expand(b, d, d) - jacobian
-            jacobian = torch.einsum("b,bij->bij", 1. / (norm + self.eps), jacobian)
+            jacobian = torch.einsum("b,bij->bij", 1.0 / (norm + self.eps), jacobian)
             return jacobian
         elif wrt == "weight":
             # non parametric layer has no jacobian with respect to weight
