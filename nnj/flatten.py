@@ -12,7 +12,6 @@ class Flatten(AbstractDiagonalJacobian, nn.Module):
         self.dims = args
         self._n_params = 0
 
-    # @torch.no_grad()
     def forward(self, x: Tensor) -> Tensor:
         val = x.reshape(x.shape[0], -1)
         return val

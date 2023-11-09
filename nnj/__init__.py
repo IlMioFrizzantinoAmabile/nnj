@@ -25,10 +25,16 @@ from nnj.reshape import Reshape  # isort:skip
 from nnj.flatten import Flatten  # isort:skip
 
 # shape preserving, non-diagonal jacobian
+from nnj.l2norm import L2Norm   # isort:skip
 
 # non shape preserving
 from nnj.upsample import Upsample  # isort:skip     # missing forward passes
 from nnj.maxpool2d import MaxPool2d  # isort:skip   # missing forward passes
+
+############################
+############################
+### likelihoods / losses ###
+from nnj.log_likelihoods import LogGaussian # isort:skip
 
 #############################
 ### utils                 ###

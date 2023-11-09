@@ -56,9 +56,9 @@ class Linear(nn.Linear, AbstractJacobian):
             c2 = val.shape[1]
             assert self._n_params == vector.shape[1]
             if self.bias is None:
-                return torch.einsum("bkj,bj->bk", vector.view(b, c2, c1), x)
+                return torch.einsum("bkj,bj->bk", vector.reshape(b, c2, c1), x)
             else:
-                return torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].view(b, c2, c1), x) + vector[:, c2 * c1 :]
+                return torch.einsum("bkj,bj->bk", vector[:, : c2 * c1].reshape(b, c2, c1), x) + vector[:, c2 * c1 :]
 
     @torch.no_grad()
     def jmp(
@@ -82,10 +82,10 @@ class Linear(nn.Linear, AbstractJacobian):
             c2 = val.shape[1]
             assert self._n_params == matrix.shape[1]
             if self.bias is None:
-                return torch.einsum("bkji,bj->bki", matrix.view(b, c2, c1, -1), x)
+                return torch.einsum("bkji,bj->bki", matrix.reshape(b, c2, c1, -1), x)
             else:
                 return (
-                    torch.einsum("bkji,bj->bki", matrix[:, : c2 * c1, :].view(b, c2, c1, -1), x)
+                    torch.einsum("bkji,bj->bki", matrix[:, : c2 * c1, :].reshape(b, c2, c1, -1), x)
                     + matrix[:, c2 * c1 :, :]
                 )
 
@@ -139,10 +139,10 @@ class Linear(nn.Linear, AbstractJacobian):
                 c2 = val.shape[1]
                 x_sq = x * x
                 if self.bias is None:
-                    return torch.diag_embed(torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1)))
+                    return torch.diag_embed(torch.einsum("bi,bji->bj", x_sq, matrix.reshape(bs, c2, c1)))
                 else:
                     return torch.diag_embed(
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1)) + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1)) + matrix[:, c2 * c1 :]
                     )
             elif not from_diag and to_diag:
                 # full -> diag
@@ -155,10 +155,10 @@ class Linear(nn.Linear, AbstractJacobian):
                 c2 = val.shape[1]
                 x_sq = x * x
                 if self.bias is None:
-                    return torch.einsum("bi,bji->bj", x_sq, matrix.view(bs, c2, c1))
+                    return torch.einsum("bi,bji->bj", x_sq, matrix.reshape(bs, c2, c1))
                 else:
                     return (
-                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].view(bs, c2, c1)) + matrix[:, c2 * c1 :]
+                        torch.einsum("bi,bji->bj", x_sq, matrix[:, : c2 * c1].reshape(bs, c2, c1)) + matrix[:, c2 * c1 :]
                     )
 
     #######################
@@ -181,9 +181,9 @@ class Linear(nn.Linear, AbstractJacobian):
         elif wrt == "weight":
             b, l = x.shape
             if self.bias is None:
-                return torch.einsum("bi,bj->bij", vector, x).view(b, -1)
+                return torch.einsum("bi,bj->bij", vector, x).reshape(b, -1)
             else:
-                return torch.cat([torch.einsum("bi,bj->bij", vector, x).view(b, -1), vector], dim=1)
+                return torch.cat([torch.einsum("bi,bj->bij", vector, x).reshape(b, -1), vector], dim=1)
 
     @torch.no_grad()
     def mjp(
@@ -257,10 +257,10 @@ class Linear(nn.Linear, AbstractJacobian):
                 x_outer = torch.einsum("bi,bj->bij", x, x)
                 matrix = torch.diag_embed(matrix)
                 if self.bias is None:
-                    return torch.einsum("bij,bkq->bkiqj", x_outer, matrix).view(bs, c1 * c2, c1 * c2)
+                    return torch.einsum("bij,bkq->bkiqj", x_outer, matrix).reshape(bs, c1 * c2, c1 * c2)
                 else:
-                    first_block = torch.einsum("bij,bkq->bkiqj", x_outer, matrix).view(bs, c1 * c2, c1 * c2)
-                    outer_diag_block = torch.einsum("bi,bjk->bjik", x, matrix).view(bs, c1 * c2, c2)
+                    first_block = torch.einsum("bij,bkq->bkiqj", x_outer, matrix).reshape(bs, c1 * c2, c1 * c2)
+                    outer_diag_block = torch.einsum("bi,bjk->bjik", x, matrix).reshape(bs, c1 * c2, c2)
                     return torch.cat(
                         [
                             torch.cat([first_block, outer_diag_block], dim=2),
@@ -273,11 +273,11 @@ class Linear(nn.Linear, AbstractJacobian):
                 bs, _, _ = matrix.shape
                 x_sq = x * x
                 if self.bias is None:
-                    return torch.einsum("bj,bii->bij", x_sq, matrix).view(bs, -1)
+                    return torch.einsum("bj,bii->bij", x_sq, matrix).reshape(bs, -1)
                 else:
                     return torch.cat(
                         [
-                            torch.einsum("bj,bii->bij", x_sq, matrix).view(bs, -1),
+                            torch.einsum("bj,bii->bij", x_sq, matrix).reshape(bs, -1),
                             torch.einsum("bii->bi", matrix),
                         ],
                         dim=1,
@@ -287,6 +287,6 @@ class Linear(nn.Linear, AbstractJacobian):
                 bs, _ = matrix.shape
                 x_sq = x * x
                 if self.bias is None:
-                    return torch.einsum("bj,bi->bij", x_sq, matrix).view(bs, -1)
+                    return torch.einsum("bj,bi->bij", x_sq, matrix).reshape(bs, -1)
                 else:
-                    return torch.cat([torch.einsum("bj,bi->bij", x_sq, matrix).view(bs, -1), matrix], dim=1)
+                    return torch.cat([torch.einsum("bj,bi->bij", x_sq, matrix).reshape(bs, -1), matrix], dim=1)

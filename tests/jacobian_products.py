@@ -39,6 +39,7 @@ layers_on_allx = [
     nnj.TruncExp(),
     nnj.Softplus(),
     nnj.Flatten(),
+    nnj.L2Norm(),
 ]
 layers_on_x1D = [
     nnj.Linear(*shape_1D, 5, bias=False),
