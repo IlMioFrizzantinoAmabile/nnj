@@ -103,9 +103,12 @@ layers_on_x3D = [
         nnj.Flatten(),
         nnj.Linear(30, 12),
         nnj.Reshape(3, 2, 2),
+        nnj.Conv2d(3, 7, 2, stride=1, padding=1, bias=True),
         nnj.Upsample(scale_factor=3),
         add_hooks=True,
     ),
+    nnj.Conv2d(5, 10, 2, stride=1, padding=1, bias=False),
+    nnj.Conv2d(5, 10, 2, stride=1, padding=1, bias=True),
 ]
 
 
@@ -134,17 +137,14 @@ def test_jacobian_wrt_input():
         assert torch.isclose(jacobian_nnj, jacobian_nn, atol=1e-4).all()
 
     # run tests on all combinations
-    for layer in layers_on_allx:
-        for x in xs_1D + xs_2D + xs_3D:
+    for x in xs_1D:
+        for layer in layers_on_allx + layers_on_x1D:
             test_jacobian_wrt_input_on(layer, x)
-    for layer in layers_on_x1D:
-        for x in xs_1D:
+    for x in xs_2D:
+        for layer in layers_on_allx + layers_on_x2D:
             test_jacobian_wrt_input_on(layer, x)
-    for layer in layers_on_x2D:
-        for x in xs_2D:
-            test_jacobian_wrt_input_on(layer, x)
-    for layer in layers_on_x3D:
-        for x in xs_3D:
+    for x in xs_3D:
+        for layer in layers_on_allx + layers_on_x3D:
             test_jacobian_wrt_input_on(layer, x)
 
 
@@ -178,15 +178,12 @@ def test_jacobian_wrt_weight():
         assert torch.isclose(jacobian_nnj, jacobian_nn, atol=1e-4).all()
 
     # run tests on all combinations
-    for layer in layers_on_allx:
-        for x in xs_1D + xs_2D + xs_3D:
+    for x in xs_1D:
+        for layer in layers_on_allx + layers_on_x1D:
             test_jacobian_wrt_weight_on(layer, x)
-    for layer in layers_on_x1D:
-        for x in xs_1D:
+    for x in xs_2D:
+        for layer in layers_on_allx + layers_on_x2D:
             test_jacobian_wrt_weight_on(layer, x)
-    for layer in layers_on_x2D:
-        for x in xs_2D:
-            test_jacobian_wrt_weight_on(layer, x)
-    for layer in layers_on_x3D:
-        for x in xs_3D:
+    for x in xs_3D:
+        for layer in layers_on_allx + layers_on_x3D:
             test_jacobian_wrt_weight_on(layer, x)

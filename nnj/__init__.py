@@ -4,6 +4,7 @@ from nnj.abstract_jacobian import AbstractJacobian
 #########################
 ### parametric layers ###
 from nnj.linear import Linear  # isort:skip
+from nnj.conv2d import Conv2d  # isort:skip
 
 ############################
 ### multi-layer wrappers ###

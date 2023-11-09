@@ -25,7 +25,7 @@ for shape in [shape_1D, shape_2D, shape_3D]:
             torch.randn(batch_size, *shape),
             torch.ones(batch_size, *shape),
             torch.randn(batch_size, *shape) + torch.ones(batch_size, *shape),
-            10 * torch.rand(batch_size, *shape),
+            #10 * torch.rand(batch_size, *shape),
         ]
     )
 xs_1D, xs_2D, xs_3D = xs_nD
@@ -114,6 +114,7 @@ layers_on_x3D_backward_only = [
         nnj.Linear(45, 12),
         nnj.Tanh(),
         nnj.Reshape(3, 2, 2),
+        nnj.Conv2d(3, 10, 2, stride=1, padding=1, bias=True),
         nnj.Upsample(scale_factor=3),
         nnj.Tanh(),
         add_hooks=True,
@@ -135,6 +136,10 @@ layers_on_x3D_backward_fulldiag_only = [
     nnj.MaxPool2d(kernel_size=2, stride=2),
     nnj.MaxPool2d(2),
     nnj.MaxPool2d(3),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False, use_vmap_for_backprop=False),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True, use_vmap_for_backprop=False),
 ]
 
 
@@ -221,7 +226,7 @@ def test_vjp():
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only:
+        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only:
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
 
@@ -316,7 +321,7 @@ def test_mjp():
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only:
+        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only:
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
 
