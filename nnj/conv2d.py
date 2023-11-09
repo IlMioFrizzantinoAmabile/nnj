@@ -2,13 +2,15 @@ from typing import Literal, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from torch import nn, Tensor
 from functorch import vmap
+from torch import nn, Tensor
 
 from nnj.abstract_jacobian import AbstractJacobian
 
+
 def compute_reversed_padding(padding, kernel_size=1):
     return kernel_size - 1 - padding
+
 
 class Conv2d(nn.Conv2d, AbstractJacobian):
     def __init__(
@@ -22,7 +24,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
         groups=1,
         bias=True,
         padding_mode="zeros",
-        use_vmap_for_backprop = True
+        use_vmap_for_backprop=True,
     ):
         super(Conv2d, self).__init__(
             in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias, padding_mode
@@ -33,8 +35,10 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
         self.dw_padding = (dw_padding_h, dw_padding_w)
         self._n_params = self.weight.numel() if self.bias is None else self.weight.numel() + out_channels
         self.use_vmap = use_vmap_for_backprop
-        if self.stride!=(1,1):
-            raise ValueError(f"I can't handle stride = {self.stride}, sorry. Only stride 1 is supported (until pytorch extends the conv class)")
+        if self.stride != (1, 1):
+            raise ValueError(
+                f"I can't handle stride = {self.stride}, sorry. Only stride 1 is supported (until pytorch extends the conv class)"
+            )
 
     @torch.no_grad()
     def jacobian(
@@ -51,7 +55,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
         identity = torch.diag_embed(identity)
         j = self.mjp(x, val, identity, wrt=wrt)
         return j
-        
+
     ######################
     ### forward passes ###
     ######################
@@ -95,6 +99,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                 raise NotImplementedError
             else:
                 raise NotImplementedError
+
     @torch.no_grad()
     def jmjTp(
         self,
@@ -169,15 +174,15 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
             vector = vector.reshape(b, c2, h2, w2)
             # convolve
             JT_vectorT = F.conv_transpose2d(
-                    vector,
-                    weight=self.weight,
-                    bias=None,
-                    stride=self.stride,
-                    padding=self.padding,
-                    dilation=self.dilation,
-                    groups=self.groups,
-                    output_padding=self.output_padding,
-                ).reshape(b, c1 * h1 * w1)
+                vector,
+                weight=self.weight,
+                bias=None,
+                stride=self.stride,
+                padding=self.padding,
+                dilation=self.dilation,
+                groups=self.groups,
+                output_padding=self.output_padding,
+            ).reshape(b, c1 * h1 * w1)
             return JT_vectorT
         elif wrt == "weight":
             kernel_h, kernel_w = self.kernel_size
@@ -192,20 +197,22 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
 
             if self.use_vmap:
                 reversed_inputs = torch.flip(x, [-2, -1])
+
                 def single_batch_fun(input_single_batch, vector_single_batch):
                     reversed_input_single_batch = input_single_batch.unsqueeze(0).movedim(0, 1)
-                    vector_single_batch = vector_single_batch.unsqueeze(0).movedim(0,1)
+                    vector_single_batch = vector_single_batch.unsqueeze(0).movedim(0, 1)
                     # convolve each column
                     vector_J_single_batch = F.conv2d(
-                            vector_single_batch.reshape(-1, 1, h2, w2),
-                            weight=reversed_input_single_batch,
-                            bias=None,
-                            stride=self.stride,
-                            padding=self.dw_padding,
-                            dilation=self.dilation,
-                            groups=self.groups,
-                        ).reshape(c2 * c1 * kernel_h * kernel_w)
+                        vector_single_batch.reshape(-1, 1, h2, w2),
+                        weight=reversed_input_single_batch,
+                        bias=None,
+                        stride=self.stride,
+                        padding=self.dw_padding,
+                        dilation=self.dilation,
+                        groups=self.groups,
+                    ).reshape(c2 * c1 * kernel_h * kernel_w)
                     return vector_J_single_batch
+
                 vector_J = vmap(single_batch_fun)(reversed_inputs, vector)
             else:
                 # switch batch size and output channel
@@ -220,18 +227,18 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
 
                     # convolve each column
                     vector_J_single_batch = F.conv2d(
-                            vector_single_batch.reshape(-1, 1, h2, w2),
-                            weight=reversed_input_single_batch,
-                            bias=None,
-                            stride=self.stride,
-                            padding=self.dw_padding,
-                            dilation=self.dilation,
-                            groups=self.groups,
-                        ).reshape(c2 * c1 * kernel_h * kernel_w)
+                        vector_single_batch.reshape(-1, 1, h2, w2),
+                        weight=reversed_input_single_batch,
+                        bias=None,
+                        stride=self.stride,
+                        padding=self.dw_padding,
+                        dilation=self.dilation,
+                        groups=self.groups,
+                    ).reshape(c2 * c1 * kernel_h * kernel_w)
 
                     # reshape as a (num of weights)x(num of column) matrix
                     vector_J[i, :] = vector_J_single_batch
-            
+
             if self.bias is None:
                 return vector_J
             else:
@@ -281,7 +288,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
             # transpose
             matrix_J = JT_matrixT_cols.movedim(1, 2)
             return matrix_J
-        
+
         elif wrt == "weight":
             kernel_h, kernel_w = self.kernel_size
 
@@ -294,9 +301,10 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
 
             if self.use_vmap:
                 reversed_inputs = torch.flip(x, [-2, -1])
+
                 def single_batch_fun(input_single_batch, matrixT_single_batch):
                     reversed_input_single_batch = input_single_batch.unsqueeze(0).movedim(0, 1)
-                    matrix_single_batch = matrixT_single_batch.unsqueeze(0).movedim(0,1)
+                    matrix_single_batch = matrixT_single_batch.unsqueeze(0).movedim(0, 1)
                     # convolve each column
                     matrix_J_single_batch = (
                         F.conv2d(
@@ -314,6 +322,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                     # reshape as a (num of weights)x(num of column) matrix
                     matrix_J_single_batch = matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w, num_of_rows)
                     return matrix_J_single_batch
+
                 matrix_J = vmap(single_batch_fun)(reversed_inputs, matrixT_cols)
             else:
                 # switch batch size and output channel
@@ -347,13 +356,12 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
 
             # transpose
             matrix_J = matrix_J.movedim(-1, -2)
-            
+
             if self.bias is None:
                 return matrix_J
             else:
                 b_term = torch.einsum("bvchw->bvc", matrix.reshape(b, -1, c2, h2, w2))
                 return torch.cat([matrix_J, b_term], dim=2)
-            
 
     @torch.no_grad()
     def jTmjp(
@@ -409,7 +417,7 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                     .reshape(b, *matrix.shape[4:], c1, h1, w1)
                     .movedim((-3, -2, -1), (1, 2, 3))
                 ).reshape(b, c1 * h1 * w1)
-                
+
                 return Jt_matrix_J
         elif wrt == "weight":
             if not from_diag and not to_diag:
@@ -421,20 +429,17 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                 num_of_rows = c2 * h2 * w2
 
                 if self.use_vmap:
+
                     def single_batch_fun(input_single_batch, matrix_single_batch):
                         # set the weight to the convolution
-                        reversed_input_single_batch = (input_single_batch
-                                                       .unsqueeze(0)
-                                                       .flip([-2, -1])
-                                                       .movedim(0, 1)
-                        )
+                        reversed_input_single_batch = input_single_batch.unsqueeze(0).flip([-2, -1]).movedim(0, 1)
                         # reshape, transpose and reverse the matrix
-                        matrix_single_batch = (matrix_single_batch
-                                               .unsqueeze(0)
-                                               .movedim(-1, -2)
-                                               .reshape(1, c2, h2, w2, num_of_rows)
-                                               .flip([-3, -2])
-                                               .movedim(0, 1)
+                        matrix_single_batch = (
+                            matrix_single_batch.unsqueeze(0)
+                            .movedim(-1, -2)
+                            .reshape(1, c2, h2, w2, num_of_rows)
+                            .flip([-3, -2])
+                            .movedim(0, 1)
                         )
                         # convolve each column
                         matrix_J_single_batch = (
@@ -451,16 +456,18 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                             .movedim((-3, -2, -1), (1, 2, 3))
                         )
                         # reshape as a (num of weights)x(num of column) matrix
-                        matrix_J_single_batch = matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w, num_of_rows)
+                        matrix_J_single_batch = matrix_J_single_batch.reshape(
+                            c2 * c1 * kernel_h * kernel_w, num_of_rows
+                        )
                         if self.bias is not None:
                             b_term = torch.einsum("chwv->cv", matrix_single_batch.reshape(c2, h2, w2, -1))
                             matrix_J_single_batch = torch.cat([matrix_J_single_batch, b_term], dim=0)
 
-                        matrix_J_single_batch = (matrix_J_single_batch
-                                                 .movedim(-1, -2)
-                                                 .reshape(1, c2, h2, w2, self._n_params)   
-                                                 .flip([-3, -2])
-                                                 .movedim(0, 1)
+                        matrix_J_single_batch = (
+                            matrix_J_single_batch.movedim(-1, -2)
+                            .reshape(1, c2, h2, w2, self._n_params)
+                            .flip([-3, -2])
+                            .movedim(0, 1)
                         )
                         # convolve each column
                         Jt_matrix_J_single_batch = (
@@ -476,12 +483,15 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                             .reshape(c2, self._n_params, c1, kernel_h, kernel_w)
                             .movedim((-3, -2, -1), (1, 2, 3))
                         )
-                        Jt_matrix_J_single_batch = Jt_matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w, self._n_params)
+                        Jt_matrix_J_single_batch = Jt_matrix_J_single_batch.reshape(
+                            c2 * c1 * kernel_h * kernel_w, self._n_params
+                        )
                         if self.bias is not None:
                             b_term = torch.einsum("chwv->cv", matrix_J_single_batch.reshape(c2, h2, w2, -1))
                             Jt_matrix_J_single_batch = torch.cat([Jt_matrix_J_single_batch, b_term], dim=0)
 
                         return Jt_matrix_J_single_batch
+
                     Jt_matrix_J = vmap(single_batch_fun)(x, matrix)
 
                 else:
@@ -492,11 +502,11 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                         reversed_input_single_batch = torch.flip(input_single_batch, [-2, -1]).movedim(0, 1)
 
                         matrix_single_batch = matrix[i : i + 1, :, :]
-                        matrix_single_batch = (matrix_single_batch
-                                               .movedim(-1, -2)
-                                               .reshape(1, c2, h2, w2, num_of_rows)
-                                               .flip([-3, -2])
-                                               .movedim(0, 1)
+                        matrix_single_batch = (
+                            matrix_single_batch.movedim(-1, -2)
+                            .reshape(1, c2, h2, w2, num_of_rows)
+                            .flip([-3, -2])
+                            .movedim(0, 1)
                         )
                         # convolve each column
                         matrix_J_single_batch = (
@@ -513,16 +523,18 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                             .movedim((-3, -2, -1), (1, 2, 3))
                         )
                         # reshape as a (num of weights)x(num of column) matrix
-                        matrix_J_single_batch = matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w, num_of_rows)
+                        matrix_J_single_batch = matrix_J_single_batch.reshape(
+                            c2 * c1 * kernel_h * kernel_w, num_of_rows
+                        )
                         if self.bias is not None:
                             b_term = torch.einsum("chwv->cv", matrix_single_batch.reshape(c2, h2, w2, -1))
                             matrix_J_single_batch = torch.cat([matrix_J_single_batch, b_term], dim=0)
 
-                        matrix_J_single_batch = (matrix_J_single_batch
-                                                 .movedim(-1, -2)
-                                                 .reshape(1, c2, h2, w2, self._n_params)   
-                                                 .flip([-3, -2])
-                                                 .movedim(0, 1)
+                        matrix_J_single_batch = (
+                            matrix_J_single_batch.movedim(-1, -2)
+                            .reshape(1, c2, h2, w2, self._n_params)
+                            .flip([-3, -2])
+                            .movedim(0, 1)
                         )
                         # convolve each column
                         Jt_matrix_J_single_batch = (
@@ -538,14 +550,16 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                             .reshape(c2, self._n_params, c1, kernel_h, kernel_w)
                             .movedim((-3, -2, -1), (1, 2, 3))
                         )
-                        Jt_matrix_J_single_batch = Jt_matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w, self._n_params)
+                        Jt_matrix_J_single_batch = Jt_matrix_J_single_batch.reshape(
+                            c2 * c1 * kernel_h * kernel_w, self._n_params
+                        )
                         if self.bias is not None:
                             b_term = torch.einsum("chwv->cv", matrix_J_single_batch.reshape(c2, h2, w2, -1))
                             Jt_matrix_J_single_batch = torch.cat([Jt_matrix_J_single_batch, b_term], dim=0)
 
                         Jt_matrix_J[i, :, :] = Jt_matrix_J_single_batch
                 return Jt_matrix_J
-                        
+
             elif from_diag and not to_diag:
                 # diag -> full
                 raise NotImplementedError
@@ -573,9 +587,10 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                 flip_squared_input = torch.flip(x, [-3, -2, -1]) ** 2
 
                 if self.use_vmap:
+
                     def single_batch_fun(input_single_batch, matrix_single_batch):
                         weigth_sq = input_single_batch.unsqueeze(0).movedim(0, 1)
-                        matrix_single_batch = matrix_single_batch.unsqueeze(0).movedim(0,1)
+                        matrix_single_batch = matrix_single_batch.unsqueeze(0).movedim(0, 1)
                         Jt_matrix_J_single_batch = (
                             F.conv2d(
                                 matrix_single_batch.movedim((1, 2, 3), (-3, -2, -1)).reshape(-1, 1, h2, w2),
@@ -594,8 +609,9 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                         # reshape as a (num of weights)x(num of column) matrix
                         Jt_matrix_J_single_batch = Jt_matrix_J_single_batch.reshape(c2 * c1 * kernel_h * kernel_w)
                         return Jt_matrix_J_single_batch
+
                     Jt_matrix_J = vmap(single_batch_fun)(flip_squared_input, matrix)
-                else:  
+                else:
                     # switch batch size and output channel
                     matrix = matrix.movedim(0, 1)
                     Jt_matrix_J = torch.zeros(b, c2 * c1 * kernel_h * kernel_w, device=x.device)

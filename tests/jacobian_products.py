@@ -25,7 +25,7 @@ for shape in [shape_1D, shape_2D, shape_3D]:
             torch.randn(batch_size, *shape),
             torch.ones(batch_size, *shape),
             torch.randn(batch_size, *shape) + torch.ones(batch_size, *shape),
-            #10 * torch.rand(batch_size, *shape),
+            # 10 * torch.rand(batch_size, *shape),
         ]
     )
 xs_1D, xs_2D, xs_3D = xs_nD
@@ -226,7 +226,9 @@ def test_vjp():
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only:
+        for layer in (
+            layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only
+        ):
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
 
@@ -321,7 +323,9 @@ def test_mjp():
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only:
+        for layer in (
+            layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only
+        ):
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
 
