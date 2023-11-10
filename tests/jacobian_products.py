@@ -410,7 +410,7 @@ def test_jmjTp():
     def test_jmjTp_wrt_weight_on(layer, x, from_diag=False, to_diag=False):
         # utility functions for sequential layers
         def generate_random_matrix_params(batch_size, module):
-            if isinstance(module, nnj.Sequential) or isinstance(module, nnj.SkipConnection):
+            if isinstance(module, (nnj.Sequential, nnj.SkipConnection)):
                 if isinstance(module, nnj.SkipConnection):
                     module = module._F
                 diagonal_blocks = [
