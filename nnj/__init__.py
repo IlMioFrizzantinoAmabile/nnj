@@ -9,6 +9,7 @@ from nnj.conv2d import Conv2d  # isort:skip
 ############################
 ### multi-layer wrappers ###
 from nnj.sequential import Sequential  # isort:skip
+from nnj.skipconnection import SkipConnection  # isort:skip
 
 #############################
 ### non-parametric layers ###

@@ -44,6 +44,7 @@ layers_on_allx = [
 layers_on_x1D = [
     nnj.Linear(*shape_1D, 5, bias=False),
     nnj.Linear(*shape_1D, 5),
+    nnj.Sequential(nnj.Linear(*shape_1D, 5, bias=False)),
     nnj.Sequential(nnj.Linear(*shape_1D, 5), nnj.Tanh(), nnj.Linear(5, 13), add_hooks=True),
     nnj.Sequential(nnj.Linear(*shape_1D, 5), nnj.ReLU(), nnj.Linear(5, 13), add_hooks=True),
     nnj.Sequential(
@@ -83,6 +84,19 @@ layers_on_x1D = [
         nnj.Linear(2, 13),
         add_hooks=True,
     ),
+    nnj.SkipConnection(nnj.Linear(*shape_1D, 5, bias=False)),
+    nnj.SkipConnection(
+        nnj.Linear(*shape_1D, 5),
+        nnj.Tanh(),
+        nnj.SkipConnection(
+            nnj.Linear(5, 5),
+            nnj.Tanh(),
+            nnj.Linear(5, 2),
+            nnj.TruncExp(),
+        ),
+        nnj.ReLU(),
+        nnj.Linear(5 + 2, 13),
+    ),
 ]
 layers_on_x2D = [
     nnj.Reshape(6, 2),
@@ -110,6 +124,19 @@ layers_on_x3D = [
     ),
     nnj.Conv2d(5, 10, 2, stride=1, padding=1, bias=False),
     nnj.Conv2d(5, 10, 2, stride=1, padding=1, bias=True),
+    nnj.SkipConnection(
+        nnj.Flatten(),
+        nnj.Linear(120, 6),
+        nnj.Tanh(),
+        nnj.SkipConnection(
+            nnj.Linear(6, 2),
+            nnj.Tanh(),
+            nnj.Linear(2, 13),
+        ),
+        nnj.Tanh(),
+        nnj.Linear(6 + 13, 24),
+        nnj.Reshape(1, 6, 4),
+    ),
 ]
 
 

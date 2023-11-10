@@ -130,12 +130,12 @@ class Sequential(AbstractJacobian, nn.Sequential):
         from_diag: bool = False,
         to_diag: bool = False,
         diag_backprop: bool = False,
-    ) -> Union[Tensor, List, None]:
+    ) -> Tensor:
         """
         jacobian matrix jacobian.T product
         """
 
-        assert wrt in ["input", "weight"]
+        assert (not diag_backprop) or (diag_backprop and from_diag and to_diag)
 
         # forward pass
         if val is None:
@@ -300,9 +300,7 @@ class Sequential(AbstractJacobian, nn.Sequential):
         """
         jacobian.T matrix jacobian product
         """
-
-        assert wrt in ["input", "weight"]
-
+        assert (not diag_backprop) or (diag_backprop and from_diag and to_diag)
         # forward pass
         if val is None:
             val = self.forward(x)

@@ -25,7 +25,6 @@ for shape in [shape_1D, shape_2D, shape_3D]:
             torch.randn(batch_size, *shape),
             torch.ones(batch_size, *shape),
             torch.randn(batch_size, *shape) + torch.ones(batch_size, *shape),
-            # 10 * torch.rand(batch_size, *shape),
         ]
     )
 xs_1D, xs_2D, xs_3D = xs_nD
@@ -82,6 +81,24 @@ layers_on_x1D = [
         nnj.Linear(2, 13),
         add_hooks=True,
     ),
+    nnj.SkipConnection(nnj.Linear(*shape_1D, 5, bias=False)),
+    nnj.SkipConnection(
+        nnj.Linear(*shape_1D, 5),
+        nnj.Tanh(),
+        nnj.Linear(5, 2),
+    ),
+    nnj.SkipConnection(
+        nnj.Linear(*shape_1D, 5),
+        nnj.Tanh(),
+        nnj.SkipConnection(
+            nnj.Linear(5, 5),
+            nnj.Tanh(),
+            nnj.Linear(5, 2),
+            nnj.TruncExp(),
+        ),
+        nnj.ReLU(),
+        nnj.Linear(5 + 2, 13),
+    ),
 ]
 layers_on_x2D = [
     nnj.Reshape(6, 2),
@@ -93,14 +110,32 @@ layers_on_x3D = [
         nnj.Linear(180, 6),
         nnj.Tanh(),
         nnj.Reshape(1, 2, 3),
-        add_hooks=True,
     ),
-]
-layers_on_x3D = [
-    nnj.Reshape(10, 9, 2),
+    nnj.SkipConnection(
+        nnj.Flatten(),
+        nnj.Linear(180, 6),
+        nnj.Tanh(),
+        nnj.SkipConnection(
+            nnj.Linear(6, 2),
+            nnj.Tanh(),
+            nnj.Linear(2, 3),
+        ),
+        nnj.Tanh(),
+        nnj.Linear(6 + 3, 36),
+        nnj.Reshape(1, 6, 6),
+    ),
 ]
 layers_on_x3D_forward_only = []
 layers_on_x3D_backward_only = [
+    nnj.Upsample(scale_factor=2),
+    nnj.Upsample(scale_factor=3),
+    nnj.MaxPool2d(kernel_size=2, stride=2),
+    nnj.MaxPool2d(2),
+    nnj.MaxPool2d(3),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False, use_vmap_for_backprop=False),
+    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True, use_vmap_for_backprop=False),
     nnj.Sequential(
         nnj.Tanh(),
         nnj.MaxPool2d(2),
@@ -130,17 +165,20 @@ layers_on_x3D_backward_only = [
         nnj.Tanh(),
         add_hooks=True,
     ),
-]
-layers_on_x3D_backward_fulldiag_only = [
-    nnj.Upsample(scale_factor=2),
-    nnj.Upsample(scale_factor=3),
-    nnj.MaxPool2d(kernel_size=2, stride=2),
-    nnj.MaxPool2d(2),
-    nnj.MaxPool2d(3),
-    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False),
-    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True),
-    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=False, use_vmap_for_backprop=False),
-    nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True, use_vmap_for_backprop=False),
+    nnj.SkipConnection(nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True)),
+    nnj.SkipConnection(
+        nnj.Conv2d(shape_3D[0], 10, 3, stride=1, padding=1, bias=True),
+        nnj.Tanh(),
+        nnj.MaxPool2d(2),
+        nnj.SkipConnection(
+            nnj.Conv2d(10, 10, 3, stride=1, padding=1, bias=True),
+            nnj.Tanh(),
+            nnj.Conv2d(10, 10, 3, stride=1, padding=1, bias=True),
+        ),
+        nnj.Upsample(scale_factor=2),
+        nnj.Conv2d(10 + 10, 10, 3, stride=1, padding=1, bias=True),
+        nnj.Tanh(),
+    ),
 ]
 
 
@@ -227,9 +265,7 @@ def test_vjp():
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in (
-            layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only
-        ):
+        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only:
             test_vjp_wrt_input_on(layer, x)
             test_vjp_wrt_weight_on(layer, x)
 
@@ -324,9 +360,7 @@ def test_mjp():
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
     for x in xs_3D:
-        for layer in (
-            layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only + layers_on_x3D_backward_fulldiag_only
-        ):
+        for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only:
             test_mjp_wrt_input_on(layer, x)
             test_mjp_wrt_weight_on(layer, x)
 
@@ -376,7 +410,9 @@ def test_jmjTp():
     def test_jmjTp_wrt_weight_on(layer, x, from_diag=False, to_diag=False):
         # utility functions for sequential layers
         def generate_random_matrix_params(batch_size, module):
-            if isinstance(module, nnj.Sequential):
+            if isinstance(module, nnj.Sequential) or isinstance(module, nnj.SkipConnection):
+                if isinstance(module, nnj.SkipConnection):
+                    module = module._F
                 diagonal_blocks = [
                     generate_random_matrix_params(batch_size, submodule) for submodule in module._modules.values()
                 ]
@@ -569,10 +605,5 @@ def test_jTmjp():
                 test_jTmjp_wrt_weight_on(layer, x, from_diag, to_diag)
         for x in xs_3D:
             for layer in layers_on_allx + layers_on_x3D + layers_on_x3D_backward_only:
-                test_jTmjp_wrt_input_on(layer, x, from_diag, to_diag)
-                test_jTmjp_wrt_weight_on(layer, x, from_diag, to_diag)
-    for from_diag, to_diag in [(False, False), (True, True)]:
-        for x in xs_3D:
-            for layer in layers_on_x3D_backward_fulldiag_only:
                 test_jTmjp_wrt_input_on(layer, x, from_diag, to_diag)
                 test_jTmjp_wrt_weight_on(layer, x, from_diag, to_diag)

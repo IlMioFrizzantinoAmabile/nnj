@@ -392,10 +392,18 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
                 return matrix
             elif from_diag and not to_diag:
                 # diag -> full
-                raise NotImplementedError
+                # Currently just falling back in the full -> full case
+                # TODO: Implement this in a smarter and more memory efficient way
+                return self.jTmjp(x, val, torch.diag_embed(matrix), wrt=wrt, from_diag=False, to_diag=False)
             elif not from_diag and to_diag:
                 # full -> diag
-                raise NotImplementedError
+                # Currently just falling back in the full -> full case
+                # TODO: Implement this in a smarter and more memory efficient way
+                return torch.diagonal(
+                    self.jTmjp(x, val, matrix, wrt=wrt, from_diag=False, to_diag=False),
+                    dim1=1,
+                    dim2=2,
+                )
             elif from_diag and to_diag:
                 # diag -> diag
                 b, c1, h1, w1 = x.shape
@@ -562,12 +570,15 @@ class Conv2d(nn.Conv2d, AbstractJacobian):
 
             elif from_diag and not to_diag:
                 # diag -> full
-                raise NotImplementedError
+                # Currently just falling back in the full -> full case
+                # TODO: Implement this in a smarter and more memory efficient way
+                return self.jTmjp(x, val, torch.diag_embed(matrix), wrt=wrt, from_diag=False, to_diag=False)
             elif not from_diag and to_diag:
                 # full -> diag
-                # TODO: Implement this in a smarter way
+                # Currently just falling back in the full -> full case
+                # TODO: Implement this in a smarter and more memory efficient way
                 return torch.diagonal(
-                    self.jTmjp(x, val, matrix, wrt=wrt, from_diag=from_diag, to_diag=False),
+                    self.jTmjp(x, val, matrix, wrt=wrt, from_diag=False, to_diag=False),
                     dim1=1,
                     dim2=2,
                 )
