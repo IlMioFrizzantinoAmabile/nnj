@@ -1,4 +1,4 @@
-from typing import Literal, Tuple, Union, Optional
+from typing import Literal, Optional, Tuple, Union
 
 import torch
 from torch import nn, Tensor
@@ -101,7 +101,7 @@ class LogBinaryBernoulli(LogLikelihood):
         assert val.shape == target.shape
 
         log_normalization = torch.logsumexp(torch.stack([val, torch.zeros_like(val)], dim=0), dim=0)
-        log_prob_class0 = 0. - log_normalization
+        log_prob_class0 = 0.0 - log_normalization
         log_prob_class1 = val - log_normalization
         log_bernoulli = target * log_prob_class1 + (1 - target) * log_prob_class0
         log_bernoulli = torch.sum(log_bernoulli.reshape(b, -1), dim=1)
