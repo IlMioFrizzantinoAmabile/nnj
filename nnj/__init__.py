@@ -35,9 +35,8 @@ from nnj.maxpool2d import MaxPool2d  # isort:skip   # missing forward passes
 ############################
 ############################
 ### likelihoods / losses ###
-from nnj.log_likelihoods import LogGaussian  # isort:skip
+from nnj.log_likelihoods import LogGaussian, LogBernoulli, LogBinaryBernoulli  # isort:skip
 
-#############################
-### utils                 ###
+#############
+### utils ###
 from nnj.utils import convert_to_nnj, invert_block_diagonal  # isort:skip
-from torch.nn.utils import vector_to_parameters, parameters_to_vector  # isort:skip

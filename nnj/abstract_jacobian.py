@@ -114,8 +114,10 @@ class AbstractJacobian:
             diag_backprop: If True, and approximated and faster propagation is performed.
 
         """
-        if diag_backprop:  # TODO
-            raise NotImplementedError
+        if diag_backprop:
+            # TODO: better warning message for this being suboptimal
+            # raise NotImplementedError
+            from_diag, to_diag = True, True
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
@@ -210,8 +212,9 @@ class AbstractJacobian:
 
         """
         if diag_backprop:
-            # TODO: better error message
-            raise NotImplementedError
+            # TODO: better warning message for this being suboptimal
+            # raise NotImplementedError
+            from_diag, to_diag = True, True
         jacobian = self.jacobian(x, val, wrt=wrt)
         if jacobian is None:  # non parametric layer
             return None
